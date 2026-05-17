@@ -45,6 +45,8 @@ jobs:
 
       - name: Create Release
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           PRERELEASE="${{ steps.build-env.outputs.env == 'canary' }}"
           gh release create "${{ github.ref_name }}" artifacts/* \
