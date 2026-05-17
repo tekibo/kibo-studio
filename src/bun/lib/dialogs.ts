@@ -3,18 +3,22 @@ import { join } from "path";
 
 export async function openFileDialog(filters?: string): Promise<string> {
     try {
-        const ext = filters
-            ?.split("|")
-            .filter((_, i) => i % 2 === 1)
-            .join(",")
-            .replace(/\*\./g, "")
-            .replace(/\*/g, "")
-            .replace(/;/g, ",") ?? "*";
+        const parts = filters?.split("|") ?? [];
+        const patterns: string[] = [];
+        for (let i = 1; i < parts.length; i += 2) {
+            for (const e of parts[i].split(";")) {
+                const t = e.trim();
+                if (t && t !== "*.*" && t !== "*") patterns.push(t);
+            }
+        }
+        // pass the raw patterns (e.g. "*.gguf;*.safetensors") — Electrobun/CEF
+        // constructs the native dialog filter from these on each platform
+        const allowedFileTypes = patterns.length > 0 ? patterns.join(";") : "*";
         const paths = await Utils.openFileDialog({
             canChooseFiles: true,
             canChooseDirectory: false,
             allowsMultipleSelection: false,
-            allowedFileTypes: ext === "*" ? "*" : ext,
+            allowedFileTypes,
         });
         return (Array.isArray(paths) ? paths[0] : paths) ?? "";
     } catch {
