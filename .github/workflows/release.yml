@@ -4,6 +4,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -46,6 +49,5 @@ jobs:
           files: artifacts/*
           draft: false
           prerelease: ${{ steps.build-env.outputs.env == 'canary' }}
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
