@@ -85,6 +85,9 @@ function createHttpRpc(): AppInstance {
                 readImageFile: () => Promise.resolve({ dataUrl: "" }),
                 isMaximized: () => Promise.resolve({ isMaximized: false }),
                 getWebUiUrl: () => Promise.resolve({ url: window.location.origin }),
+                checkForUpdate: () => Promise.resolve({ status: "no-update" }),
+                getUpdateStatus: () => Promise.resolve({ status: "no-update" }),
+                applyUpdate: () => Promise.resolve({ success: false }),
             } as RequestMethods,
         },
     };
@@ -112,6 +115,9 @@ export function initElectrobun() {
                         },
                         downloadProgress: (data: { downloadId: string; info: DownloadProgressInfo }) => {
                             emitDownloadProgress({ ...data.info, downloadId: data.downloadId });
+                        },
+                        updateStatus: (data: any) => {
+                            window.dispatchEvent(new CustomEvent("update-status", { detail: data }));
                         },
                     },
                 },

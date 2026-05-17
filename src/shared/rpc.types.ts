@@ -28,6 +28,14 @@ export type DownloadProgressInfo = {
     error?: string;
 };
 
+export type UpdateStatusInfo = {
+    status: "checking" | "no-update" | "update-available" | "downloading" | "download-ready" | "error";
+    version?: string;
+    releaseUrl?: string;
+    downloadPercent?: number;
+    error?: string;
+};
+
 export type KiboStudioRPC = {
     bun: RPCSchema<{
         requests: {
@@ -50,6 +58,9 @@ export type KiboStudioRPC = {
             isMaximized: { params: {}; response: { isMaximized: boolean } };
             getWebUiUrl: { params: {}; response: { url: string } };
             cancelGeneration: { params: { jobId: string }; response: { success: boolean } };
+            checkForUpdate: { params: {}; response: UpdateStatusInfo };
+            getUpdateStatus: { params: {}; response: UpdateStatusInfo };
+            applyUpdate: { params: {}; response: { success: boolean } };
         };
         messages: {
             closeWindow: {};
@@ -65,6 +76,7 @@ export type KiboStudioRPC = {
         messages: {
             downloadProgress: { downloadId: string; info: DownloadProgressInfo };
             windowMaximizedState: { isMaximized: boolean };
+            updateStatus: UpdateStatusInfo;
         };
     }>;
 };

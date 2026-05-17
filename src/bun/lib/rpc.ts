@@ -16,7 +16,16 @@ import {
 } from "./window";
 import { getWebUiUrl } from "./http-server";
 
-export function createRpcHandlers(getMainWindow: () => BrowserWindow) {
+import type { UpdateStatusInfo } from "#shared/rpc.types";
+
+export function createRpcHandlers(
+    getMainWindow: () => BrowserWindow,
+    updateHandlers?: {
+        checkForUpdate: () => Promise<UpdateStatusInfo>;
+        getUpdateStatus: () => Promise<UpdateStatusInfo>;
+        applyUpdate: () => Promise<{ success: boolean }>;
+    }
+) {
     return {
         requests: {
             getSdSettings: async () => getSdSettings(),
@@ -82,6 +91,12 @@ export function createRpcHandlers(getMainWindow: () => BrowserWindow) {
             cancelGeneration: async ({ jobId }: { jobId: string }) => ({
                 success: cancelGeneration(jobId),
             }),
+            checkForUpdate: async () =>
+                updateHandlers?.checkForUpdate() ?? { status: "no-update" as const },
+            getUpdateStatus: async () =>
+                updateHandlers?.getUpdateStatus() ?? { status: "no-update" as const },
+            applyUpdate: async () =>
+                updateHandlers?.applyUpdate() ?? { success: false },
         },
         messages: {
             closeWindow: () => getMainWindow().close(),

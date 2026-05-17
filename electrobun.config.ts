@@ -26,4 +26,10 @@ export default {
 			icon: "icon.ico"
 		},
 	},
+	// Updater configuration — checks GitHub Releases for new versions
+	// Electrobun compares the local buildId/version against GitHub Releases.
+	release: {
+		// GitHub Releases URL — Electrobun fetches <baseUrl>/<channel>-<platform>-update.json
+		baseUrl: "https://github.com/tekibo/kibo-studio/releases/latest/download",
+	},
 } satisfies ElectrobunConfig;
