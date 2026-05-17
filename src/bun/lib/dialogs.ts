@@ -20,9 +20,21 @@ export async function openFolderDialog(): Promise<string> {
     try {
         const script = `
 Add-Type -AssemblyName System.Windows.Forms
-$f = New-Object System.Windows.Forms.FolderBrowserDialog
-$f.Description = 'Select a folder'
-if ($f.ShowDialog() -eq 'OK') { Write-Output $f.SelectedPath }
+$f = New-Object System.Windows.Forms.OpenFileDialog
+$f.ValidateNames = $false
+$f.CheckFileExists = $false
+$f.CheckPathExists = $true
+$f.AutoUpgradeEnabled = $true
+$f.Title = 'Select a folder'
+$f.FileName = 'Select a folder'
+if ($f.ShowDialog() -eq 'OK') {
+    $result = $f.FileName
+    if (Test-Path -LiteralPath $result -PathType Container) {
+        Write-Output $result
+    } else {
+        Write-Output ([System.IO.Path]::GetDirectoryName($result))
+    }
+}
 `;
         const proc = Bun.spawn(["powershell", "-NoProfile", "-Command", script], { stdout: "pipe", stderr: "pipe" });
         const output = await new Response(proc.stdout).text();

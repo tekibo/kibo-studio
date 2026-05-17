@@ -1,11 +1,27 @@
 import { Electroview } from "electrobun/view";
-import type { KiboStudioRPC } from "../../shared/rpc.types";
+import type { KiboStudioRPC, DownloadProgressInfo } from "../../shared/rpc.types";
 import type { SdSettingsResponse, SdUserConfig } from "./sd/types/settings";
 import type { ImageResponse } from "./sd/types/generation";
 import type { WorkingImageEntry } from "../../shared/rpc.types";
 
 type BunRequests = KiboStudioRPC["bun"]["requests"];
 type BunMessages = KiboStudioRPC["bun"]["messages"];
+
+export type ProgressCallback = (info: DownloadProgressInfo & { downloadId: string }) => void;
+let progressListeners: ProgressCallback[] = [];
+
+export function onDownloadProgress(cb: ProgressCallback) {
+    progressListeners.push(cb);
+    return () => {
+        progressListeners = progressListeners.filter((l) => l !== cb);
+    };
+}
+
+function emitDownloadProgress(data: DownloadProgressInfo & { downloadId: string }) {
+    for (const cb of progressListeners) {
+        cb(data);
+    }
+}
 
 type RequestMethods = {
     [K in keyof BunRequests]: (params: BunRequests[K]["params"]) => Promise<BunRequests[K]["response"]>;
@@ -61,7 +77,8 @@ function createHttpRpc(): AppInstance {
                         cpuCores: 0,
                         totalMemGB: 0,
                     })),
-                downloadFile: () => Promise.resolve({ success: false, error: "Not available" }),
+                startDownload: () => Promise.resolve({ downloadId: "" }),
+                cancelDownload: () => Promise.resolve({ success: false }),
                 extractArchive: () => Promise.resolve({ success: false, error: "Not available" }),
                 pickSavePath: () => Promise.resolve({ filePath: "" }),
                 writeBase64File: () => Promise.resolve({ success: false, error: "Not available" }),
@@ -92,6 +109,9 @@ export function initElectrobun() {
                     messages: {
                         windowMaximizedState: (data: { isMaximized: boolean }) => {
                             onWindowMaximizedState?.(data);
+                        },
+                        downloadProgress: (data: { downloadId: string; info: DownloadProgressInfo }) => {
+                            emitDownloadProgress({ ...data.info, downloadId: data.downloadId });
                         },
                     },
                 },

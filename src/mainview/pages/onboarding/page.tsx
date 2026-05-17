@@ -1,15 +1,31 @@
-import { pickFile, pickFolder, detectSystem, downloadFile, extractArchive } from "#lib/sd/client";
+import { pickFile, pickFolder, detectSystem, startDownload, cancelDownload, extractArchive } from "#lib/sd/client";
+import { onDownloadProgress } from "#lib/electrobun";
 import { useAppStore } from "#store/appStore";
 import { useSdConfigStore } from "#store/sdConfigStore";
 import { getRecommendedDownload, getPlatform } from "#lib/sd/downloads";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import { WelcomeStep } from "./components/WelcomeStep";
 import { DetectingStep } from "./components/DetectingStep";
 import { ChooseStep } from "./components/ChooseStep";
 import { PathStep } from "./components/PathStep";
+import type { DownloadProgressInfo } from "#shared/rpc.types";
 
 type Step = "welcome" | "detecting" | "choose" | "download" | "path" | "done";
+
+function waitForDownload(downloadId: string, onInfo: (info: DownloadProgressInfo) => void): Promise<DownloadProgressInfo> {
+    return new Promise((resolve) => {
+        const unsub = onDownloadProgress((data) => {
+            if (data.downloadId === downloadId) {
+                onInfo(data);
+                if (data.status !== "downloading") {
+                    unsub();
+                    resolve(data);
+                }
+            }
+        });
+    });
+}
 
 export function OnboardingPage() {
     const [step, setStep] = useState<Step>("welcome");
@@ -21,9 +37,11 @@ export function OnboardingPage() {
     const [sdCliPath, setSdCliPathLocal] = useState("");
     const [error, setError] = useState("");
     const [downloading, setDownloading] = useState(false);
-    const [downloadProgress, setDownloadProgress] = useState("");
+    const [downloadPhase, setDownloadPhase] = useState("");
+    const [downloadInfo, setDownloadInfo] = useState<DownloadProgressInfo | null>(null);
     const [showAll, setShowAll] = useState(false);
     const [systemInfo, setSystemInfo] = useState("");
+    const currentDownloadIdRef = useRef<string | null>(null);
 
     const setView = useAppStore((s) => s.setView);
     const persistSdCliPath = useSdConfigStore((s) => s.setSdCliPath);
@@ -65,6 +83,13 @@ export function OnboardingPage() {
         setCudaUrl(cudaUrl ?? "");
     };
 
+    const handleCancel = useCallback(() => {
+        const id = currentDownloadIdRef.current;
+        if (id) {
+            cancelDownload(id);
+        }
+    }, []);
+
     const handleDownload = useCallback(async () => {
         if (!installDir.trim() || !selectedUrl) {
             setError("Please select an install location and download option.");
@@ -72,35 +97,49 @@ export function OnboardingPage() {
         }
         setDownloading(true);
         setError("");
+        setDownloadInfo(null);
+
+        const runPhase = async (phase: string, url: string, path: string): Promise<DownloadProgressInfo | null> => {
+            setDownloadPhase(phase);
+            setDownloadInfo(null);
+            const downloadId = await startDownload(url, path);
+            currentDownloadIdRef.current = downloadId;
+            const result = await waitForDownload(downloadId, setDownloadInfo);
+            currentDownloadIdRef.current = null;
+            return result;
+        };
 
         try {
             const zipName = selectedUrl.split("/").pop() ?? "sd-master.zip";
             const zipPath = `${installDir}\\${zipName}`;
 
-            setDownloadProgress("Downloading...");
-            const dlError = await downloadFile(selectedUrl, zipPath);
-            if (dlError) { setError(dlError); setDownloading(false); return; }
+            const mainResult = await runPhase("Downloading...", selectedUrl, zipPath);
+            if (!mainResult || mainResult.status === "cancelled") { setDownloading(false); return; }
+            if (mainResult.status === "error") { setError(mainResult.error ?? "Download failed"); setDownloading(false); return; }
 
             if (needsCuda && cudaUrl) {
-                setDownloadProgress("Downloading CUDA runtime...");
                 const cudaName = cudaUrl.split("/").pop() ?? "cudart.zip";
                 const cudaPath = `${installDir}\\${cudaName}`;
-                const cudaErr = await downloadFile(cudaUrl, cudaPath);
-                if (cudaErr) { setError(cudaErr); setDownloading(false); return; }
 
-                setDownloadProgress("Extracting CUDA runtime...");
+                const cudaResult = await runPhase("Downloading CUDA runtime...", cudaUrl, cudaPath);
+                if (!cudaResult || cudaResult.status === "cancelled") { setDownloading(false); return; }
+                if (cudaResult.status === "error") { setError(cudaResult.error ?? "CUDA download failed"); setDownloading(false); return; }
+
+                setDownloadPhase("Extracting CUDA runtime...");
+                setDownloadInfo(null);
                 const ceErr = await extractArchive(cudaPath, installDir);
                 if (ceErr) { setError(ceErr); setDownloading(false); return; }
             }
 
-            setDownloadProgress("Extracting...");
+            setDownloadPhase("Extracting...");
+            setDownloadInfo(null);
             const exErr = await extractArchive(zipPath, installDir);
             if (exErr) { setError(exErr); setDownloading(false); return; }
 
             const cliPath = `${installDir}\\sd-cli.exe`;
             setSdCliPathLocal(cliPath);
             setDownloading(false);
-            setDownloadProgress("");
+            setDownloadInfo(null);
             setStep("path");
             toast("Download complete! Point to sd-cli.exe to finish.", { duration: 4000 });
         } catch (err) {
@@ -142,13 +181,15 @@ export function OnboardingPage() {
                 systemInfo={systemInfo}
                 installDir={installDir}
                 downloading={downloading}
-                downloadProgress={downloadProgress}
+                downloadPhase={downloadPhase}
+                downloadInfo={downloadInfo}
                 error={error}
                 showAll={showAll}
                 onSelectDownload={handleSelectDownload}
                 onInstallDirChange={(dir) => { setInstallDir(dir); setError(""); }}
                 onBrowseInstall={handleBrowseInstall}
                 onDownload={handleDownload}
+                onCancel={handleCancel}
                 onSkip={() => setStep("path")}
                 onToggleShowAll={() => setShowAll(!showAll)}
             />

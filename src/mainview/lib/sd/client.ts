@@ -1,5 +1,6 @@
 import { getElectrobun } from "../electrobun";
 import type { SdSettingsResponse, SdUserConfig } from "./types";
+export type { ProgressCallback } from "../electrobun";
 
 export async function fetchSdSettings(): Promise<SdSettingsResponse> {
     return await getElectrobun().rpc.request.getSdSettings({});
@@ -39,9 +40,14 @@ export async function detectSystem() {
     return await getElectrobun().rpc.request.detectSystem({});
 }
 
-export async function downloadFile(url: string, destPath: string): Promise<string | null> {
-    const { success, error } = await getElectrobun().rpc.request.downloadFile({ url, destPath });
-    return success ? null : (error ?? "Download failed");
+export async function startDownload(url: string, destPath: string): Promise<string> {
+    const { downloadId } = await getElectrobun().rpc.request.startDownload({ url, destPath });
+    return downloadId;
+}
+
+export async function cancelDownload(downloadId: string): Promise<boolean> {
+    const { success } = await getElectrobun().rpc.request.cancelDownload({ downloadId });
+    return success;
 }
 
 export async function extractArchive(zipPath: string, destDir: string): Promise<string | null> {

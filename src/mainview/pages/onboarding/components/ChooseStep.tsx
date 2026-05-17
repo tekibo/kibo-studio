@@ -1,6 +1,13 @@
 import { Button } from "#components/ui/button";
 import { getAllForPlatform } from "#lib/sd/downloads";
-import { ChevronDown, Download, FolderOpen, Loader2 } from "lucide-react";
+import { ChevronDown, Download, FolderOpen, Loader2, XCircle } from "lucide-react";
+import type { DownloadProgressInfo } from "#shared/rpc.types";
+
+function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 type Props = {
     selectedUrl: string;
@@ -8,24 +15,40 @@ type Props = {
     systemInfo: string;
     installDir: string;
     downloading: boolean;
-    downloadProgress: string;
+    downloadPhase: string;
+    downloadInfo: DownloadProgressInfo | null;
     error: string;
     showAll: boolean;
     onSelectDownload: (url: string, label: string, needsCudaExt?: boolean, cudaUrl?: string) => void;
     onInstallDirChange: (dir: string) => void;
     onBrowseInstall: () => void;
     onDownload: () => void;
+    onCancel: () => void;
     onSkip: () => void;
     onToggleShowAll: () => void;
 };
 
 export function ChooseStep({
     selectedUrl, selectedLabel, systemInfo, installDir,
-    downloading, downloadProgress, error, showAll,
+    downloading, downloadPhase, downloadInfo, error, showAll,
     onSelectDownload, onInstallDirChange, onBrowseInstall,
-    onDownload, onSkip, onToggleShowAll,
+    onDownload, onCancel, onSkip, onToggleShowAll,
 }: Props) {
     const all = getAllForPlatform();
+
+    const progressPercent = downloadInfo?.totalBytes && downloadInfo.totalBytes > 0
+        ? downloadInfo.percent
+        : downloadInfo?.bytesDownloaded
+            ? null
+            : null;
+
+    const bytesLabel = downloadInfo?.bytesDownloaded
+        ? formatBytes(downloadInfo.bytesDownloaded)
+        : null;
+
+    const totalLabel = downloadInfo?.totalBytes
+        ? formatBytes(downloadInfo.totalBytes)
+        : null;
 
     return (
         <div className="flex h-full items-start justify-center overflow-y-auto bg-background p-4 pt-8">
@@ -89,7 +112,6 @@ export function ChooseStep({
                 </div>
 
                 {error && <p className="text-xs text-destructive">{error}</p>}
-                {downloadProgress && <p className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="size-3 animate-spin" />{downloadProgress}</p>}
 
                 {!downloading ? (
                     <Button onClick={onDownload} disabled={!selectedUrl || !installDir.trim()} className="h-11 w-full gap-2 rounded-lg text-sm" size="lg">
@@ -97,9 +119,42 @@ export function ChooseStep({
                         Download & Install
                     </Button>
                 ) : (
-                    <div className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-muted text-sm text-muted-foreground">
-                        <Loader2 className="size-4 animate-spin" />
-                        {downloadProgress || "Working..."}
+                    <div className="space-y-3">
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1.5">
+                                    <Loader2 className="size-3 animate-spin" />
+                                    {downloadPhase || "Working..."}
+                                </span>
+                                {progressPercent !== null && (
+                                    <span className="tabular-nums">{progressPercent}%</span>
+                                )}
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                                <div
+                                    className="h-full rounded-full bg-primary transition-all duration-300"
+                                    style={{
+                                        width: progressPercent !== null ? `${progressPercent}%` : `${downloadInfo?.bytesDownloaded ? 3 : 100}%`,
+                                        opacity: progressPercent === null && downloadInfo?.bytesDownloaded ? 0.4 : 1,
+                                        animation: progressPercent === null && (!downloadInfo?.bytesDownloaded || downloadInfo.bytesDownloaded === 0) ? "none" : undefined,
+                                    }}
+                                />
+                            </div>
+                            {bytesLabel && (
+                                <p className="text-[10px] text-muted-foreground">
+                                    {bytesLabel}{totalLabel ? ` / ${totalLabel}` : " downloaded"}
+                                </p>
+                            )}
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={onCancel}
+                            className="h-8 w-full gap-1.5 text-xs text-muted-foreground hover:text-destructive"
+                        >
+                            <XCircle className="size-3.5" />
+                            Cancel
+                        </Button>
                     </div>
                 )}
 

@@ -1,6 +1,6 @@
 import type { BrowserWindow } from "electrobun/bun";
 import { openFileDialog, openFolderDialog, pickSavePath } from "./dialogs";
-import { downloadFile, extractArchive, writeBase64File } from "./download";
+import { startDownload as startBgDownload, cancelDownload, extractArchive, writeBase64File } from "./download";
 import { listImages, deleteImage as deleteWorkspaceImage, importImage } from "./workspace";
 import { getSdSettings, writeSdUserConfig } from "./sd/settings";
 import type { SdUserConfig } from "../../mainview/lib/sd/types";
@@ -28,10 +28,20 @@ export function createRpcHandlers(getMainWindow: () => BrowserWindow) {
             }),
             openFolderDialog: async () => ({ folderPath: await openFolderDialog() }),
             detectSystem: async () => detectSystem(),
-            downloadFile: async ({ url, destPath }: { url: string; destPath: string }) => {
-                const error = await downloadFile(url, destPath);
-                return error ? { success: false, error } : { success: true };
+            startDownload: async ({ url, destPath }: { url: string; destPath: string }) => {
+                const downloadId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                const mw = getMainWindow();
+                startBgDownload(url, destPath, downloadId, (info) => {
+                    try {
+                        const rpc = (mw.webview as any)?.rpc;
+                        rpc?.send?.downloadProgress?.({ downloadId, info });
+                    } catch {}
+                });
+                return { downloadId };
             },
+            cancelDownload: async ({ downloadId }: { downloadId: string }) => ({
+                success: cancelDownload(downloadId),
+            }),
             extractArchive: async ({ zipPath, destDir }: { zipPath: string; destDir: string }) => {
                 const error = await extractArchive(zipPath, destDir);
                 return error ? { success: false, error } : { success: true };

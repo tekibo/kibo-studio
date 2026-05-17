@@ -20,6 +20,14 @@ export type WorkingImageEntry = {
     source: "generated" | "imported";
 };
 
+export type DownloadProgressInfo = {
+    percent: number;
+    bytesDownloaded: number;
+    totalBytes: number;
+    status: "downloading" | "completed" | "cancelled" | "error";
+    error?: string;
+};
+
 export type KiboStudioRPC = {
     bun: RPCSchema<{
         requests: {
@@ -30,7 +38,8 @@ export type KiboStudioRPC = {
             openFileDialog: { params: { filters?: string }; response: { filePath: string } };
             openFolderDialog: { params: {}; response: { folderPath: string } };
             detectSystem: { params: {}; response: SystemInfo };
-            downloadFile: { params: { url: string; destPath: string }; response: { success: boolean; error?: string } };
+            startDownload: { params: { url: string; destPath: string }; response: { downloadId: string } };
+            cancelDownload: { params: { downloadId: string }; response: { success: boolean } };
             extractArchive: { params: { zipPath: string; destDir: string }; response: { success: boolean; error?: string } };
             pickSavePath: { params: { defaultName: string }; response: { filePath: string } };
             writeBase64File: { params: { filePath: string; data: string }; response: { success: boolean; error?: string } };
@@ -43,7 +52,6 @@ export type KiboStudioRPC = {
             cancelGeneration: { params: { jobId: string }; response: { success: boolean } };
         };
         messages: {
-            downloadProgress: { percent: number };
             closeWindow: {};
             minimizeWindow: {};
             maximizeWindow: {};
@@ -55,6 +63,7 @@ export type KiboStudioRPC = {
     webview: RPCSchema<{
         requests: {};
         messages: {
+            downloadProgress: { downloadId: string; info: DownloadProgressInfo };
             windowMaximizedState: { isMaximized: boolean };
         };
     }>;
