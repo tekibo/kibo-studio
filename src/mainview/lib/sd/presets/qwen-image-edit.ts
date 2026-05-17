@@ -1,0 +1,82 @@
+import type { SdModelPreset } from "../types";
+import { diffusionVaeLlmPathInputs } from "./shared";
+import { diffusionVaeLlmLlmVisionPathInputs } from "../path-fields";
+
+export const qwenImageEditPresets = {
+    "qwen-image-edit": {
+        id: "qwen-image-edit",
+        family: "qwen-image-edit",
+        label: "Qwen Image Edit",
+        description: "Qwen Image Edit model for instruction-based image editing using Qwen2.5-VL 7B.",
+        defaultVramProfile: "balanced",
+        paths: {},
+        pathInputs: diffusionVaeLlmPathInputs,
+        defaults: {
+            cfgScale: 2.5,
+            samplingMethod: "euler",
+            width: 1024,
+            height: 1024,
+            flowShift: 3,
+            diffusionFa: true,
+            offloadToCpu: true,
+        },
+        downloads: [
+            { label: "Qwen Image Edit GGUF", url: "https://huggingface.co/QuantStack/Qwen-Image-Edit-GGUF/tree/main", format: "gguf" },
+            { label: "Qwen Image Edit (safetensors)", url: "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/tree/main/split_files/diffusion_models", format: "safetensors" },
+            { label: "Qwen Image VAE", url: "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/tree/main/split_files/vae", format: "safetensors" },
+            { label: "Qwen2.5-VL 7B", url: "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/tree/main/split_files/text_encoders", format: "safetensors" },
+            { label: "Qwen2.5-VL 7B GGUF", url: "https://huggingface.co/mradermacher/Qwen2.5-VL-7B-Instruct-GGUF/tree/main", format: "gguf" },
+        ],
+    },
+    "qwen-image-edit-2509": {
+        id: "qwen-image-edit-2509",
+        family: "qwen-image-edit",
+        label: "Qwen Image Edit 2509",
+        description: "Qwen Image Edit 2509 with improved editing and LLM vision encoder.",
+        defaultVramProfile: "balanced",
+        paths: {},
+        pathInputs: diffusionVaeLlmLlmVisionPathInputs,
+        defaults: {
+            cfgScale: 2.5,
+            samplingMethod: "euler",
+            width: 1024,
+            height: 1024,
+            flowShift: 3,
+            diffusionFa: true,
+            offloadToCpu: true,
+        },
+        downloads: [
+            { label: "Qwen Image Edit 2509 GGUF", url: "https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF/tree/main", format: "gguf" },
+            { label: "Qwen Image Edit 2509 (safetensors)", url: "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/tree/main/split_files/diffusion_models", format: "safetensors" },
+            { label: "Qwen Image VAE", url: "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/tree/main/split_files/vae", format: "safetensors" },
+            { label: "Qwen2.5-VL 7B GGUF", url: "https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/tree/main", format: "gguf" },
+            { label: "Qwen2.5-VL 7B mmproj", url: "https://huggingface.co/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/tree/main", format: "gguf" },
+        ],
+    },
+    "qwen-image-edit-2511": {
+        id: "qwen-image-edit-2511",
+        family: "qwen-image-edit",
+        label: "Qwen Image Edit 2511",
+        description: "Qwen Image Edit 2511 with zero-cond-t for improved quality.",
+        defaultVramProfile: "balanced",
+        paths: {},
+        pathInputs: diffusionVaeLlmPathInputs,
+        defaults: {
+            cfgScale: 2.5,
+            samplingMethod: "euler",
+            width: 1024,
+            height: 1024,
+            flowShift: 3,
+            diffusionFa: true,
+            offloadToCpu: true,
+            qwenImageZeroCondT: true,
+        },
+        downloads: [
+            { label: "Qwen Image Edit 2511 GGUF", url: "https://huggingface.co/unsloth/Qwen-Image-Edit-2511-GGUF/tree/main", format: "gguf" },
+            { label: "Qwen Image Edit 2511 (safetensors)", url: "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/tree/main/split_files/diffusion_models", format: "safetensors" },
+            { label: "Qwen Image VAE", url: "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/tree/main/split_files/vae", format: "safetensors" },
+            { label: "Qwen2.5-VL 7B", url: "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/tree/main/split_files/text_encoders", format: "safetensors" },
+            { label: "Qwen2.5-VL 7B GGUF", url: "https://huggingface.co/mradermacher/Qwen2.5-VL-7B-Instruct-GGUF/tree/main", format: "gguf" },
+        ],
+    },
+} as const satisfies Partial<Record<string, SdModelPreset>>;

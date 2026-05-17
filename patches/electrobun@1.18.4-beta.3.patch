@@ -1,0 +1,66 @@
+diff --git a/bin/electrobun.cjs b/bin/electrobun.cjs
+index ad104296a1b6835218983f9d959184b66683fd57..322a7e5038df4b88521652e48e85414e70984722 100644
+--- a/bin/electrobun.cjs
++++ b/bin/electrobun.cjs
+@@ -52,7 +52,7 @@ async function downloadFile(url, filePath) {
+     mkdirSync(dirname(filePath), { recursive: true });
+     const file = createWriteStream(filePath);
+ 
+-    https.get(url, {agent}, (response) => {
++    https.get(url, { agent }, (response) => {
+       if (response.statusCode === 302 || response.statusCode === 301) {
+         // Follow redirect
+         return downloadFile(response.headers.location, filePath).then(resolve).catch(reject);
+@@ -75,6 +75,34 @@ async function downloadFile(url, filePath) {
+   });
+ }
+ 
++// Add the core files from tekibo/cdn release
++async function ensureCustomCoreBinaries() {
++  const coreDir = join(electrobunDir, 'dist-win-x64');
++  const checkFile = join(coreDir, 'libNativeWrapper.dll');
++
++  // If the core files are already there, skip!
++  if (existsSync(checkFile)) {
++    return;
++  }
++
++  console.log('Pre-fetching custom KiboStudio core binaries...');
++  const tarballUrl = "https://github.com/tekibo/cdn/releases/download/electrobun_custom_v1/electrobun-core-files-v1.tar.gz";
++  const tarballPath = join(cacheDir, `kibo-core-payload.tar.gz`);
++
++  try {
++    await downloadFile(tarballUrl, tarballPath);
++
++    // Extract directly into the electrobun root (since our tarball contains the dist/ and dist-win-x64/ folders)
++    execSync(`${getTarCommand()} -xzf "${tarballPath}" -C "${electrobunDir}"`, { stdio: 'pipe' });
++
++    unlinkSync(tarballPath);
++    console.log('Custom core binaries injected successfully!');
++  } catch (error) {
++    throw new Error(`Failed to inject custom core binaries: ${error.message}`);
++  }
++}
++
++// Add the cli from tekibo/cdn release
+ async function ensureCliBinary() {
+   // Check if CLI binary exists in bin location (where npm expects it)
+   const binLocation = join(electrobunDir, 'bin', 'electrobun' + binExt);
+@@ -100,7 +128,7 @@ async function ensureCliBinary() {
+   const version = packageJson.version;
+   const tag = `v${version}`;
+ 
+-  const tarballUrl = `https://github.com/blackboardsh/electrobun/releases/download/${tag}/electrobun-cli-${platform}-${arch}.tar.gz`;
++  const tarballUrl = `https://github.com/tekibo/cdn/releases/download/electrobun_custom_v1/electrobun-cli-win-x64.tar.gz`;
+   const tarballPath = join(cacheDir, `electrobun-${platform}-${arch}.tar.gz`);
+ 
+   try {
+@@ -145,6 +173,8 @@ async function main() {
+     const args = process.argv.slice(2);
+     const cliPath = await ensureCliBinary();
+ 
++    await ensureCustomCoreBinaries();
++
+     // Replace this process with the actual CLI
+     const child = spawn(cliPath, args, {
+       stdio: 'inherit',
