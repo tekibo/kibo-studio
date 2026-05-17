@@ -1,3 +1,5 @@
+import { cpus, totalmem } from "os";
+
 export type SystemInfo = {
     platform: "win" | "mac" | "linux";
     arch: string;
@@ -9,8 +11,8 @@ export type SystemInfo = {
 export async function detectSystem(): Promise<SystemInfo> {
     const platform = process.platform === "win32" ? "win" : process.platform === "darwin" ? "mac" : "linux";
     const arch = process.arch === "arm64" ? "arm64" : "x64";
-    const cpuCores = require("os").cpus().length;
-    const totalMemGB = Math.round(require("os").totalmem() / (1024 ** 3));
+    const cpuCores = cpus().length;
+    const totalMemGB = Math.round(totalmem() / (1024 ** 3));
 
     let hasCuda = false;
     if (platform === "win") {

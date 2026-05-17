@@ -1,5 +1,6 @@
-import { existsSync, mkdirSync, unlinkSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import { dirname } from "path";
+import { Utils } from "electrobun/bun";
 import type { DownloadProgressInfo } from "#shared/rpc.types";
 
 type ActiveDownload = {
@@ -194,7 +195,7 @@ export async function writeBase64File(filePath: string, base64: string): Promise
 export function deleteFile(filePath: string): boolean {
     try {
         if (existsSync(filePath)) {
-            unlinkSync(filePath);
+            Utils.moveToTrash(filePath);
             return true;
         }
         return false;

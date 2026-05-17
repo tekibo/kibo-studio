@@ -1,16 +1,22 @@
+import { Utils } from "electrobun/bun";
+import { join } from "path";
+
 export async function openFileDialog(filters?: string): Promise<string> {
     try {
-        const filterArg = filters ? `$f.Filter = '${filters.replace(/'/g, "''")}'` : "";
-        const script = `
-Add-Type -AssemblyName System.Windows.Forms
-$f = New-Object System.Windows.Forms.OpenFileDialog
-${filterArg}
-$f.Multiselect = $false
-if ($f.ShowDialog() -eq 'OK') { Write-Output $f.FileName }
-`;
-        const proc = Bun.spawn(["powershell", "-NoProfile", "-Command", script], { stdout: "pipe", stderr: "pipe" });
-        const output = await new Response(proc.stdout).text();
-        return output.trim();
+        const ext = filters
+            ?.split("|")
+            .filter((_, i) => i % 2 === 1)
+            .join(",")
+            .replace(/\*\./g, "")
+            .replace(/\*/g, "")
+            .replace(/;/g, ",") ?? "*";
+        const paths = await Utils.openFileDialog({
+            canChooseFiles: true,
+            canChooseDirectory: false,
+            allowsMultipleSelection: false,
+            allowedFileTypes: ext === "*" ? "*" : ext,
+        });
+        return (Array.isArray(paths) ? paths[0] : paths) ?? "";
     } catch {
         return "";
     }
@@ -18,27 +24,12 @@ if ($f.ShowDialog() -eq 'OK') { Write-Output $f.FileName }
 
 export async function openFolderDialog(): Promise<string> {
     try {
-        const script = `
-Add-Type -AssemblyName System.Windows.Forms
-$f = New-Object System.Windows.Forms.OpenFileDialog
-$f.ValidateNames = $false
-$f.CheckFileExists = $false
-$f.CheckPathExists = $true
-$f.AutoUpgradeEnabled = $true
-$f.Title = 'Select a folder'
-$f.FileName = 'Select a folder'
-if ($f.ShowDialog() -eq 'OK') {
-    $result = $f.FileName
-    if (Test-Path -LiteralPath $result -PathType Container) {
-        Write-Output $result
-    } else {
-        Write-Output ([System.IO.Path]::GetDirectoryName($result))
-    }
-}
-`;
-        const proc = Bun.spawn(["powershell", "-NoProfile", "-Command", script], { stdout: "pipe", stderr: "pipe" });
-        const output = await new Response(proc.stdout).text();
-        return output.trim();
+        const paths = await Utils.openFileDialog({
+            canChooseFiles: false,
+            canChooseDirectory: true,
+            allowsMultipleSelection: false,
+        });
+        return (Array.isArray(paths) ? paths[0] : paths) ?? "";
     } catch {
         return "";
     }
@@ -46,16 +37,13 @@ if ($f.ShowDialog() -eq 'OK') {
 
 export async function pickSavePath(defaultName: string): Promise<string> {
     try {
-        const script = `
-Add-Type -AssemblyName System.Windows.Forms
-$f = New-Object System.Windows.Forms.SaveFileDialog
-$f.FileName = '${defaultName.replace(/'/g, "''")}'
-$f.Filter = 'PNG images (*.png)|*.png|All files (*.*)|*.*'
-if ($f.ShowDialog() -eq 'OK') { Write-Output $f.FileName }
-`;
-        const proc = Bun.spawn(["powershell", "-NoProfile", "-Command", script], { stdout: "pipe", stderr: "pipe" });
-        const output = await new Response(proc.stdout).text();
-        return output.trim();
+        const paths = await Utils.openFileDialog({
+            canChooseFiles: false,
+            canChooseDirectory: true,
+            allowsMultipleSelection: false,
+        });
+        const dir = (Array.isArray(paths) ? paths[0] : paths) ?? "";
+        return dir ? join(dir, defaultName) : "";
     } catch {
         return "";
     }

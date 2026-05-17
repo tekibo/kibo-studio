@@ -6,10 +6,9 @@ import type { ImageRequest } from "../../mainview/lib/sd/types";
 import generateImage, { getJobStatus, cancelGeneration } from "./sd/generate";
 import { getSdSettings, writeSdUserConfig } from "./sd/settings";
 import type { SdUserConfig } from "../../mainview/lib/sd/types";
-import { addManifestEntry, listImages, readImageDataUrl, deleteImage as deleteWorkspaceImage } from "./workspace";
+import { WORKSPACE_DIR, addManifestEntry, listImages, readImageDataUrl, deleteImage as deleteWorkspaceImage } from "./workspace";
 
 const PORT = 3456;
-const WORKSPACE_DIR = "workspace";
 const DIST_DIR = findDistDir();
 
 function findDistDir(): string {
@@ -88,7 +87,6 @@ async function handleApiRoute(pathname: string, method: string, request: Request
         const id = randomUUID();
         const fileName = `${id}.${ext}`;
         const destPath = join(WORKSPACE_DIR, fileName);
-
         const buffer = await file.arrayBuffer();
         await Bun.write(destPath, buffer);
 
