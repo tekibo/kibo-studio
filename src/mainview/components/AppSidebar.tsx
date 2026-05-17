@@ -18,6 +18,7 @@ import type { AppView } from "#store/appStore";
 import { getElectrobun } from "@/lib/electrobun";
 import { cn } from "@/lib/utils";
 import { TerminalPanel } from "#components/terminal/TerminalPanel";
+import { UpdateSection } from "#components/UpdateSection";
 
 const navItems: { id: AppView; label: string; icon: typeof Sparkles }[] = [
   { id: "dashboard" as AppView, label: "Generate", icon: Sparkles },
@@ -79,8 +80,8 @@ export function AppSidebar() {
 
       </SidebarContent>
       {devMode && <TerminalPanel />}
-      {webUrl && (
-        <SidebarFooter className="group-data-[collapsible=icon]:hidden">
+      <SidebarFooter className="group-data-[collapsible=icon]:hidden space-y-2">
+        {webUrl && (
           <div className="px-3 py-2">
             <div className="flex items-center gap-2 mb-1">
               <Globe className="size-3.5 text-sidebar-foreground/60" />
@@ -106,8 +107,9 @@ export function AppSidebar() {
               Open on any device on your LAN
             </p>
           </div>
-        </SidebarFooter>
-      )}
+        )}
+        <UpdateSection />
+      </SidebarFooter>
     </Sidebar>
   );
 }

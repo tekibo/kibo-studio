@@ -12,7 +12,8 @@ import "./index.css";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
-import { isWebUi } from "./lib/electrobun";
+import { isWebUi, getElectrobun } from "./lib/electrobun";
+import { toast } from "sonner";
 
 function App() {
     const view = useAppStore((s) => s.view);
@@ -45,6 +46,35 @@ function App() {
 
         document.addEventListener('contextmenu', handleContextMenu);
         return () => document.removeEventListener('contextmenu', handleContextMenu);
+    }, []);
+
+    useEffect(() => {
+        if (isWebUi()) return;
+
+        const handler = (e: Event) => {
+            const { status, version, error } = (e as CustomEvent).detail;
+            if (status === "download-ready") {
+                const eb = getElectrobun();
+                toast("Update ready", {
+                    description: `Version ${version} downloaded. Restart to apply.`,
+                    duration: 30000,
+                    action: {
+                        label: "Install now",
+                        onClick: () => eb.rpc.request.applyUpdate({}),
+                    },
+                });
+            } else if (status === "error") {
+                toast.error("Update check failed", {
+                    description: error,
+                    duration: 5000,
+                });
+            } else if (status === "no-update") {
+                // silently ignore on auto-check
+            }
+        };
+
+        window.addEventListener("update-status", handler);
+        return () => window.removeEventListener("update-status", handler);
     }, []);
 
     if (!hasHydrated) {

@@ -31,6 +31,40 @@ function sendUpdateStatus(status: UpdateStatusInfo) {
     }
 }
 
+async function checkOnly(): Promise<UpdateStatusInfo> {
+    if (updateInProgress) {
+        const i = Updater.updateInfo();
+        if (i.updateReady) return { status: "download-ready", version: i.version };
+        if (i.updateAvailable) return { status: "update-available", version: i.version };
+        if (i.error) return { status: "error", error: i.error };
+        return { status: "no-update" };
+    }
+    updateInProgress = true;
+    try {
+        sendUpdateStatus({ status: "checking" });
+        const result = await Updater.checkForUpdate();
+        if (result.updateAvailable) {
+            const info: UpdateStatusInfo = { status: "update-available", version: result.version };
+            sendUpdateStatus(info);
+            return info;
+        }
+        if (result.error) {
+            const info: UpdateStatusInfo = { status: "error", error: result.error };
+            sendUpdateStatus(info);
+            return info;
+        }
+        const info: UpdateStatusInfo = { status: "no-update" };
+        sendUpdateStatus(info);
+        return info;
+    } catch (err) {
+        const info: UpdateStatusInfo = { status: "error", error: err instanceof Error ? err.message : "Update check failed" };
+        sendUpdateStatus(info);
+        return info;
+    } finally {
+        updateInProgress = false;
+    }
+}
+
 async function checkAndDownloadUpdate() {
     if (updateInProgress) return;
     updateInProgress = true;
@@ -68,32 +102,13 @@ async function checkAndDownloadUpdate() {
 
 let mainWindow: BrowserWindow;
 const rpcHandlers = createRpcHandlers(() => mainWindow, {
-    checkForUpdate: async () => {
-        checkAndDownloadUpdate().catch(() => {});
-        const info = Updater.updateInfo();
-        if (info.updateReady) {
-            return { status: "download-ready", version: info.version };
-        }
-        if (info.updateAvailable) {
-            return { status: "update-available", version: info.version };
-        }
-        if (info.error) {
-            return { status: "error", error: info.error };
-        }
-        return { status: "no-update" };
-    },
+    checkForUpdate: async () => checkOnly(),
     getUpdateStatus: async () => {
-        const info = Updater.updateInfo();
-        if (info.updateReady) {
-            return { status: "download-ready", version: info.version };
-        }
-        if (info.updateAvailable) {
-            return { status: "update-available", version: info.version };
-        }
-        if (info.error) {
-            return { status: "error", error: info.error };
-        }
-        return { status: "no-update" };
+        const i = Updater.updateInfo();
+        if (i.updateReady) return { status: "download-ready" as const, version: i.version };
+        if (i.updateAvailable) return { status: "update-available" as const, version: i.version };
+        if (i.error) return { status: "error" as const, error: i.error };
+        return { status: "no-update" as const };
     },
     applyUpdate: async () => {
         try {
@@ -133,23 +148,24 @@ const tray = new Tray({
     height: 32,
 });
 
-tray.setMenu([
-    {
-        type: "normal",
-        label: "Check for Updates",
-        action: "check-updates",
-    },
-    { type: "separator" },
-    {
-        type: "normal",
-        label: "Quit",
-        action: "quit",
-    },
-]);
-
 tray.on("tray-clicked", (e) => {
     const { action } = (e as any).data as { id: number; action: string };
-    if (action === "check-updates") {
+    if (action === "") {
+        // tray icon clicked — show the menu
+        tray.setMenu([
+            {
+                type: "normal",
+                label: "Check for Updates",
+                action: "check-updates",
+            },
+            { type: "separator" },
+            {
+                type: "normal",
+                label: "Quit",
+                action: "quit",
+            },
+        ]);
+    } else if (action === "check-updates") {
         checkAndDownloadUpdate().catch(() => {});
     } else if (action === "quit") {
         process.exit(0);
