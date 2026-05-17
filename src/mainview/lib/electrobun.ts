@@ -65,7 +65,7 @@ function createHttpRpc(): AppInstance {
                 uploadImage: () => Promise.resolve({ image: null }),
                 deleteImage: ({ id }) =>
                     json(`/api/images/${id}`, { method: "DELETE" }) as Promise<{ success: boolean }>,
-                openFileDialog: () => Promise.resolve({ filePath: "" }),
+                openFileDialog: (_params: { extensions?: string[] }) => Promise.resolve({ filePath: "" }),
                 openFolderDialog: () => Promise.resolve({ folderPath: "" }),
                 detectSystem: () =>
                     json("/api/system").catch(() => ({

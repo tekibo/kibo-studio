@@ -34,7 +34,7 @@ export function SettingsPage() {
                 value={sdCliPath}
                 disabled={disabled}
                 onChange={setSdCliPath}
-                onBrowse={async () => { const p = await pickFile("Executable files (*.exe)|*.exe|All files (*.*)|*.*"); if (p) setSdCliPath(p); }}
+                onBrowse={async () => { const p = await pickFile(["exe"]); if (p) setSdCliPath(p); }}
             />
 
             <section className="space-y-3 rounded-lg border border-border/50 bg-card p-4">

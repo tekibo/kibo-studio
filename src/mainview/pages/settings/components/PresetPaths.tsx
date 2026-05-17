@@ -20,7 +20,16 @@ export function PresetPaths({ preset, disabled }: { preset: Preset; disabled: bo
                     <Label className="text-[11px] text-muted-foreground">{input.label}{input.required ? " *" : ""}</Label>
                     <div className="flex gap-1.5">
                         <Input value={currentPaths[input.key] ?? ""} onChange={(e) => setPresetPath(preset.id, input.key, e.target.value)} disabled={disabled} placeholder={input.placeholder} className="h-8 flex-1 rounded-md text-xs" />
-                        <Button variant="outline" size="icon-sm" disabled={disabled} onClick={async () => { const p = await pickFile("Model files (*.gguf;*.safetensors)|*.gguf;*.safetensors|All files (*.*)|*.*"); if (p) setPresetPath(preset.id, input.key, p); }} className="h-8 w-8 shrink-0 rounded-md">
+                        <Button
+                            variant="outline"
+                            size="icon-sm"
+                            disabled={disabled}
+                            onClick={async () => {
+                                const p = await pickFile(["*"]);
+                                if (p) setPresetPath(preset.id, input.key, p);
+                            }
+                            }
+                            className="h-8 w-8 shrink-0 rounded-md">
                             <FileIcon className="size-3.5" />
                         </Button>
                     </div>

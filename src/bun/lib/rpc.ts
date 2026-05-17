@@ -32,8 +32,8 @@ export function createRpcHandlers(
             saveSdSettings: async ({ config }: { config: SdUserConfig }) => writeSdUserConfig(config),
             generateImage: async ({ request }: { request: ImageRequest }) => generateImage(request),
             getJobStatus: async ({ jobId }: { jobId: string }) => getJobStatus(jobId),
-            openFileDialog: async ({ filters }: { filters?: string }) => ({
-                filePath: await openFileDialog(filters),
+            openFileDialog: async ({ extensions }: { extensions?: string[] }) => ({
+                filePath: await openFileDialog(extensions),
             }),
             openFolderDialog: async () => ({ folderPath: await openFolderDialog() }),
             detectSystem: async () => detectSystem(),

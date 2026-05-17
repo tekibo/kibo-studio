@@ -161,7 +161,7 @@ export function OnboardingPage() {
     };
 
     const handleBrowseSdCli = async () => {
-        const p = await pickFile("Executable files (*.exe)|*.exe|All files (*.*)|*.*");
+        const p = await pickFile(["exe"]);
         if (p) { setSdCliPathLocal(p); setError(""); }
     };
 

@@ -1,19 +1,9 @@
 import { Utils } from "electrobun/bun";
 import { join } from "path";
 
-export async function openFileDialog(filters?: string): Promise<string> {
+export async function openFileDialog(extensions?: string[]): Promise<string> {
     try {
-        const parts = filters?.split("|") ?? [];
-        const patterns: string[] = [];
-        for (let i = 1; i < parts.length; i += 2) {
-            for (const e of parts[i].split(";")) {
-                const t = e.trim();
-                if (t && t !== "*.*" && t !== "*") patterns.push(t);
-            }
-        }
-        // pass the raw patterns (e.g. "*.gguf;*.safetensors") — Electrobun/CEF
-        // constructs the native dialog filter from these on each platform
-        const allowedFileTypes = patterns.length > 0 ? patterns.join(";") : "*";
+        const allowedFileTypes = extensions && extensions.length > 0 ? extensions.join(",") : "*";
         const paths = await Utils.openFileDialog({
             canChooseFiles: true,
             canChooseDirectory: false,

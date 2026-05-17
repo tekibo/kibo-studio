@@ -14,9 +14,9 @@ export async function saveSdSettings(config: SdUserConfig): Promise<SdUserConfig
     }
 }
 
-export async function pickFile(filters?: string): Promise<string> {
+export async function pickFile(extensions?: string[]): Promise<string> {
     try {
-        const { filePath } = await getElectrobun().rpc.request.openFileDialog({ filters });
+        const { filePath } = await getElectrobun().rpc.request.openFileDialog({ extensions });
         return filePath;
     } catch {
         return "";
@@ -24,7 +24,7 @@ export async function pickFile(filters?: string): Promise<string> {
 }
 
 export async function pickImageFile(): Promise<string> {
-    return pickFile("Image files (*.png;*.jpg;*.jpeg;*.webp;*.bmp)|*.png;*.jpg;*.jpeg;*.webp;*.bmp");
+    return pickFile(["png", "jpg", "jpeg", "webp", "bmp"]);
 }
 
 export async function pickFolder(): Promise<string> {

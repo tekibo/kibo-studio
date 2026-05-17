@@ -43,7 +43,7 @@ export type KiboStudioRPC = {
             saveSdSettings: { params: { config: SdUserConfig }; response: SdUserConfig };
             generateImage: { params: { request: ImageGenerationRequest }; response: ImageResponse };
             getJobStatus: { params: { jobId: string }; response: ImageResponse };
-            openFileDialog: { params: { filters?: string }; response: { filePath: string } };
+            openFileDialog: { params: { extensions?: string[] }; response: { filePath: string } };
             openFolderDialog: { params: {}; response: { folderPath: string } };
             detectSystem: { params: {}; response: SystemInfo };
             startDownload: { params: { url: string; destPath: string }; response: { downloadId: string } };
