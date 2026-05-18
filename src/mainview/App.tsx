@@ -51,13 +51,27 @@ function App() {
     useEffect(() => {
         if (isWebUi()) return;
 
+        // On mount, check if a previous download is pending
+        getElectrobun().rpc.request.getUpdateStatus({}).then((res) => {
+            if (res.status === "download-ready") {
+                toast("Update ready", {
+                    description: `Version ${res.version} was downloaded. Click Install now to apply.`,
+                    duration: 0,
+                    action: {
+                        label: "Install now",
+                        onClick: () => getElectrobun().rpc.request.applyUpdate({}),
+                    },
+                });
+            }
+        }).catch(() => {});
+
         const handler = (e: Event) => {
             const { status, version, error } = (e as CustomEvent).detail;
             if (status === "download-ready") {
                 const eb = getElectrobun();
                 toast("Update ready", {
-                    description: `Version ${version} downloaded. Restart to apply.`,
-                    duration: 30000,
+                    description: `Version ${version} downloaded. Click Install now to apply it.`,
+                    duration: 0,
                     action: {
                         label: "Install now",
                         onClick: () => eb.rpc.request.applyUpdate({}),
@@ -68,8 +82,6 @@ function App() {
                     description: error,
                     duration: 5000,
                 });
-            } else if (status === "no-update") {
-                // silently ignore on auto-check
             }
         };
 
