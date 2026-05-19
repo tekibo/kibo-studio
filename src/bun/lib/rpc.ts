@@ -1,7 +1,7 @@
 import type { BrowserWindow } from "electrobun/bun";
 import { openFileDialog, openFolderDialog, pickSavePath } from "./dialogs";
 import { startDownload as startBgDownload, cancelDownload, extractArchive, writeBase64File } from "./download";
-import { listImages, deleteImage as deleteWorkspaceImage, importImage } from "./workspace";
+import { listImages, deleteImage as deleteWorkspaceImage, importImage, openWorkspaceFolder } from "./workspace";
 import { getSdSettings, writeSdUserConfig } from "./sd/settings";
 import type { SdUserConfig } from "../../mainview/lib/sd/types";
 import type { ImageRequest } from "../../mainview/lib/sd/types";
@@ -95,8 +95,11 @@ export function createRpcHandlers(
                 updateHandlers?.checkForUpdate() ?? { status: "no-update" as const },
             getUpdateStatus: async () =>
                 updateHandlers?.getUpdateStatus() ?? { status: "no-update" as const },
-            applyUpdate: async () =>
+                        applyUpdate: async () =>
                 updateHandlers?.applyUpdate() ?? { success: false },
+            openWorkspaceFolder: async () => ({
+                success: openWorkspaceFolder(),
+            }),
         },
         messages: {
             closeWindow: () => getMainWindow().close(),

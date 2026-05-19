@@ -88,6 +88,7 @@ function createHttpRpc(): AppInstance {
                 checkForUpdate: () => Promise.resolve({ status: "no-update" }),
                 getUpdateStatus: () => Promise.resolve({ status: "no-update" }),
                 applyUpdate: () => Promise.resolve({ success: false }),
+                openWorkspaceFolder: () => Promise.resolve({ success: false }),
             } as RequestMethods,
         },
     };

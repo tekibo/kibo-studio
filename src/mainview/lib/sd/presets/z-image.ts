@@ -14,6 +14,7 @@ export const zImagePresets = {
             cfgScale: 1,
             width: 512,
             height: 1024,
+            steps: 8,
             samplingMethod: "euler",
             diffusionFa: true,
             offloadToCpu: true,

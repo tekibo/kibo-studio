@@ -1,5 +1,5 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync } from "fs";
-import { join } from "path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, statSync } from "fs";
+import { join, resolve } from "path";
 import { randomUUID } from "crypto";
 import { Utils } from "electrobun/bun";
 
@@ -124,9 +124,38 @@ export async function readImageDataUrl(fileName: string): Promise<string | null>
 }
 
 export async function listImages(): Promise<(ManifestEntry & { image: string })[]> {
-    const entries = readManifest();
-    const results: (ManifestEntry & { image: string })[] = [];
+    ensureDir();
+    migrateOldWorkspace();
 
+    // Scan filesystem for image files not yet tracked in the manifest
+    const entries = readManifest();
+    const tracked = new Set(entries.map((e) => e.fileName));
+    const dir = readdirSync(WORKSPACE_DIR);
+    const imageExt = /\.(png|jpg|jpeg|webp|bmp)$/i;
+
+    for (const name of dir) {
+        if (!imageExt.test(name) || name === "manifest.json") continue;
+        if (tracked.has(name)) continue;
+
+        let createdAt = Date.now();
+        try {
+            createdAt = statSync(join(WORKSPACE_DIR, name)).mtimeMs;
+        } catch {}
+        entries.push({
+            id: randomUUID(),
+            fileName: name,
+            width: 0,
+            height: 0,
+            createdAt,
+            source: "imported",
+        });
+    }
+
+    // Sort newest first and persist any new entries
+    entries.sort((a, b) => b.createdAt - a.createdAt);
+    writeManifest(entries);
+
+    const results: (ManifestEntry & { image: string })[] = [];
     for (const entry of entries) {
         const dataUrl = await readImageDataUrl(entry.fileName);
         if (dataUrl) {
@@ -135,6 +164,55 @@ export async function listImages(): Promise<(ManifestEntry & { image: string })[
     }
 
     return results;
+}
+
+export function openWorkspaceFolder(): boolean {
+    return Utils.openPath(WORKSPACE_DIR);
+}
+
+const MIGRATE_FLAG = join(WORKSPACE_DIR, ".migrated-flag");
+
+/** Copy any images from the old CWD-relative `workspace/` into WORKSPACE_DIR. */
+export function migrateOldWorkspace() {
+    if (existsSync(MIGRATE_FLAG)) return;
+    const oldDir = resolve("workspace");
+    if (!existsSync(oldDir)) return;
+
+    const entries = readManifest();
+    const tracked = new Set(entries.map((e) => e.fileName));
+    const imageExt = /\.(png|jpg|jpeg|webp|bmp)$/i;
+    let added = false;
+
+    for (const name of readdirSync(oldDir)) {
+        if (!imageExt.test(name) || name === "manifest.json") continue;
+        if (tracked.has(name)) continue;
+
+        const src = join(oldDir, name);
+        const dst = join(WORKSPACE_DIR, name);
+        if (existsSync(dst)) continue;
+
+        try {
+            copyFileSync(src, dst);
+            let createdAt = Date.now();
+            try { createdAt = statSync(src).mtimeMs; } catch {}
+            entries.push({
+                id: randomUUID(),
+                fileName: name,
+                width: 0,
+                height: 0,
+                createdAt,
+                source: "imported",
+            });
+            added = true;
+        } catch {}
+    }
+
+    if (added) {
+        entries.sort((a, b) => b.createdAt - a.createdAt);
+        writeManifest(entries);
+    }
+
+    try { writeFileSync(MIGRATE_FLAG, ""); } catch {}
 }
 
 export function deleteImage(id: string): boolean {

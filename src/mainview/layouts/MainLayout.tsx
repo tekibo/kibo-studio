@@ -5,6 +5,7 @@ import { ModelSelector } from "@/components/ModelSelector";
 import { PresetSelector } from "@/components/PresetSelector";
 import { useAppStore } from "@/store/appStore";
 import WindowsButtons from "@/components/WindowsButtons";
+import RefreshButton from "@/components/RefreshButton";
 import MissingModels from "@/components/MissingModels";
 import { SavingStatus } from "@/pages/settings/components/SavingStatus";
 import { isWebUi } from "@/lib/electrobun";
@@ -29,6 +30,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
                 <div className="electrobun-webkit-app-region-no-drag flex items-center gap-1">
                     {view === "dashboard" && <MissingModels />}
                     {view === "settings" && <SavingStatus />}
+                    {!webUi && <RefreshButton />}
                     {!webUi && <WindowsButtons />}
                 </div>
             </header>

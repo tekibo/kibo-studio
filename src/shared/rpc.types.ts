@@ -61,6 +61,7 @@ export type KiboStudioRPC = {
             checkForUpdate: { params: {}; response: UpdateStatusInfo };
             getUpdateStatus: { params: {}; response: UpdateStatusInfo };
             applyUpdate: { params: {}; response: { success: boolean } };
+            openWorkspaceFolder: { params: {}; response: { success: boolean } };
         };
         messages: {
             closeWindow: {};

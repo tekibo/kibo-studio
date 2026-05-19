@@ -1,9 +1,9 @@
 import { spawn } from "bun";
 import { mkdirSync, existsSync } from "fs";
-import { dirname } from "path";
+import { dirname, join } from "path";
 import { buildImageGenerationCommand } from "./diffusion";
 import { applySdUserConfig } from "./settings";
-import { addGeneratedImage } from "../workspace";
+import { addGeneratedImage, WORKSPACE_DIR } from "../workspace";
 import type { ImageGenerationJob, ImageRequest, ImageResponse } from "../../../mainview/lib/sd/types";
 
 const jobs = new Map<string, ImageGenerationJob>();
@@ -40,10 +40,21 @@ export function cancelGeneration(jobId: string): boolean {
     }
 }
 
+const WS_PREFIX = /^workspace\//;
+
 export default async function generateImage(request: ImageRequest): Promise<ImageResponse> {
     const jobId = `job_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const output = `workspace/${jobId}.png`;
-    const generationRequest = await applySdUserConfig(request);
+    const output = join(WORKSPACE_DIR, `${jobId}.png`);
+
+    // Resolve workspace-relative paths to absolute WORKSPACE_DIR paths
+    const resolvePath = (p: string) => WS_PREFIX.test(p) ? join(WORKSPACE_DIR, p.slice(10)) : p;
+    const resolved = {
+        ...request,
+        refImages: request.refImages?.map(resolvePath),
+        referenceImage: request.referenceImage ? resolvePath(request.referenceImage) : undefined,
+    };
+
+    const generationRequest = await applySdUserConfig(resolved);
 
     const cmd = await buildImageGenerationCommand(generationRequest, output);
     const cmdStr = cmd.join(" ");
