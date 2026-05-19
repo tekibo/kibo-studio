@@ -52,12 +52,14 @@ export function useSdModelSelectionState() {
 export function useSdRuntimeSettingsState() {
     return useSdConfigStore(useShallow((state) => ({
         vramProfile: state.vramProfile,
+        perfFlags: state.perfFlags,
         samplingMethod: state.samplingMethod,
         cacheMode: state.cacheMode,
         scmPolicy: state.scmPolicy,
         isLoading: state.isSettingsLoading,
         hasHydrated: state.hasHydratedSettings,
         setVramProfile: state.setVramProfile,
+        setPerfFlag: state.setPerfFlag,
         setSamplingMethod: state.setSamplingMethod,
         setCacheMode: state.setCacheMode,
         setScmPolicy: state.setScmPolicy,

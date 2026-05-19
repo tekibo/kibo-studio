@@ -8,6 +8,7 @@ export const zImagePresets = {
         label: "Z-Image Turbo",
         description: "Low-VRAM-friendly Z-Image Turbo preset.",
         defaultVramProfile: "low",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -33,6 +34,7 @@ export const zImagePresets = {
         label: "Z-Image Base",
         description: "Base Z-Image preset with higher CFG guidance.",
         defaultVramProfile: "low",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {

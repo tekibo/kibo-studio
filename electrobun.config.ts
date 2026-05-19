@@ -4,7 +4,7 @@ export default {
 	app: {
 		name: "kibo-studio",
 		identifier: "kibostudio.tekibo.in",
-		version: "0.0.5",
+		version: "0.0.6",
 	},
 	build: {
 		// Vite builds to dist/, we copy from there
@@ -12,6 +12,7 @@ export default {
 			"dist/index.html": "views/mainview/index.html",
 			"dist/assets": "views/mainview/assets",
 			"dist/icon.png": "views/mainview/icon.png",
+			"models/upscale/RealESRGAN_x4plus_anime_6B.pth": "views/mainview/models/upscale/RealESRGAN_x4plus_anime_6B.pth"
 		},
 		// Ignore Vite output in watch mode — HMR handles view rebuilds separately
 		watchIgnore: ["dist/**"],

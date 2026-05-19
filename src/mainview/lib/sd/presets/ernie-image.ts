@@ -8,6 +8,7 @@ export const ernieImagePresets = {
         label: "ERNIE-Image Turbo",
         description: "Low-VRAM-friendly ERNIE-Image Turbo preset with Ministral 3B encoder.",
         defaultVramProfile: "low",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -31,6 +32,7 @@ export const ernieImagePresets = {
         label: "ERNIE-Image Base",
         description: "Base ERNIE-Image preset with higher CFG guidance.",
         defaultVramProfile: "low",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {

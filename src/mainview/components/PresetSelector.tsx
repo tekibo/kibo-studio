@@ -18,12 +18,16 @@ export function PresetSelector() {
             .filter(Boolean) as typeof presets;
     }, [presets, selectedModelOption]);
 
+    const selectedPresetLabel = presetOptions.find((p) => p.id === selectedPresetId)?.label;
+
     if (!selectedModelOption || presetOptions.length <= 1) return null;
 
     return (
         <Select value={selectedPresetId} onValueChange={(v) => { if (v) setSelectedPresetId(v as SdPresetId); }}>
             <SelectTrigger>
-                <SelectValue />
+                <SelectValue>
+                    {selectedPresetLabel}
+                </SelectValue>
             </SelectTrigger>
             <SelectContent align="start" className="min-w-[160px]">
                 {presetOptions.map((p) => (

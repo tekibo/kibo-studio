@@ -1,4 +1,5 @@
-import { ArrowUp, Square } from "lucide-react";
+import { ArrowUp } from "lucide-react";
+import { Spinner } from "#components/ui/spinner";
 
 export default function GenerateButton({
     onClick,
@@ -23,7 +24,7 @@ export default function GenerateButton({
                 }`}
         >
             {isGenerating ? (
-                <Square className="size-3.5" />
+                <Spinner className="size-3.5" />
             ) : (
                 <ArrowUp className="size-4" />
             )}

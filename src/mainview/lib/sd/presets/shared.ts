@@ -1,1 +1,14 @@
 export { diffusionVaeLlmPathInputs } from "../path-fields";
+export { diffusionVaeClipLT5xxlPathInputs } from "../path-fields";
+export { modelPathInput } from "../path-fields";
+export { modelVaePathInputs } from "../path-fields";
+export { modelClipLClipGT5xxlPathInputs } from "../path-fields";
+export { diffusionModelVaeT5xxlPathInputs } from "../path-fields";
+export { diffusionModelT5xxlPathInputs } from "../path-fields";
+export { modelVaePhotoMakerPathInputs } from "../path-fields";
+export { diffusionModelVaeT5xxlPathInputsVideo } from "../path-fields";
+export { diffusionModelVaeT5xxlClipVisionPathInputs } from "../path-fields";
+export { diffusionModelHighNoiseVaeT5xxlPathInputs } from "../path-fields";
+export { diffusionModelHighNoiseVaeT5xxlClipVisionPathInputs } from "../path-fields";
+export { diffusionModelVaeLlmAudioVaeEmbeddingsConnectorsPathInputs } from "../path-fields";
+export { diffusionModelVaeT5xxlPathInputsSmallVideo } from "../path-fields";

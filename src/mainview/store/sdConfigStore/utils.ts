@@ -12,6 +12,7 @@ export function toSdUserConfig(state: SdConfigSnapshot): SdUserConfig {
         loraModelDir: state.loraModelDir,
         sdCliPath: state.sdCliPath,
         pathsByPreset: state.pathsByPreset,
+        perfFlags: state.perfFlags,
         devMode: state.devMode,
     };
 }
@@ -30,6 +31,7 @@ export function applyUserConfigToState(config: SdUserConfig, presets: SdModelPre
         loraModelDir: config.loraModelDir,
         sdCliPath: config.sdCliPath,
         pathsByPreset: config.pathsByPreset,
+        perfFlags: config.perfFlags,
         devMode: config.devMode,
     };
 }

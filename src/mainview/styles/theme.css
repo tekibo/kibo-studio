@@ -3,6 +3,20 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 
+@font-face {
+  font-family: "Couture";
+  src: url("/couture/couture-bld.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Couture";
+  src: url("/couture/couture-bldit.otf") format("opentype");
+  font-weight: 700;
+  font-style: italic;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -44,7 +58,7 @@
   --color-titlebar: var(--titlebar);
   --color-titlebar-border: var(--titlebar-border);
   --animate-shimmer: shimmer 2s ease-in-out infinite;
-  --font-heading: var(--font-sans);
+  --font-heading: "Couture", sans-serif;
   --font-sans: 'Inter Variable', sans-serif;
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);

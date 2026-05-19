@@ -32,6 +32,8 @@ const valueOptions = [
     ["hiresUpscalersDir", "--hires-upscalers-dir"],
     ["tensorTypeRules", "--tensor-type-rules"],
     ["photoMaker", "--photo-maker"],
+    ["audioVae", "--audio-vae"],
+    ["embeddingsConnectors", "--embeddings-connectors"],
     ["upscaleModel", "--upscale-model"],
     ["threads", "--threads"],
     ["chromaT5MaskPad", "--chroma-t5-mask-pad"],

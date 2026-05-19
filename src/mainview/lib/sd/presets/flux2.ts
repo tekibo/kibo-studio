@@ -8,6 +8,7 @@ export const flux2Presets = {
         label: "Flux.2 Dev",
         description: "FLUX.2-dev image editing/generation preset with Mistral Small 3.2 LLM encoder.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -16,6 +17,7 @@ export const flux2Presets = {
             diffusionFa: true,
             offloadToCpu: true,
         },
+        supportsRefImage: true,
         downloads: [
             { label: "FLUX.2-dev GGUF", url: "https://huggingface.co/city96/FLUX.2-dev-gguf/tree/main", format: "gguf" },
             { label: "FLUX.2-dev VAE", url: "https://huggingface.co/black-forest-labs/FLUX.2-dev/tree/main", format: "safetensors" },
@@ -29,6 +31,7 @@ export const flux2Presets = {
         label: "Flux.2 Klein 4B",
         description: "Fast FLUX.2 Klein 4B preset using the Qwen3 4B encoder.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -38,6 +41,7 @@ export const flux2Presets = {
             diffusionFa: true,
             offloadToCpu: true,
         },
+        supportsRefImage: true,
         downloads: [
             { label: "FLUX.2 Klein 4B", url: "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B", format: "safetensors" },
             { label: "FLUX.2 Klein 4B GGUF", url: "https://huggingface.co/leejet/FLUX.2-klein-4B-GGUF/tree/main", format: "gguf" },
@@ -51,6 +55,7 @@ export const flux2Presets = {
         label: "Flux.2 Klein Base 4B",
         description: "Base FLUX.2 Klein 4B preset with higher CFG and standard step count.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -60,6 +65,7 @@ export const flux2Presets = {
             diffusionFa: true,
             offloadToCpu: true,
         },
+        supportsRefImage: true,
         downloads: [
             { label: "FLUX.2 Klein Base 4B", url: "https://huggingface.co/black-forest-labs/FLUX.2-klein-base-4B", format: "safetensors" },
             { label: "FLUX.2 Klein Base 4B GGUF", url: "https://huggingface.co/leejet/FLUX.2-klein-base-4B-GGUF/tree/main", format: "gguf" },
@@ -73,6 +79,7 @@ export const flux2Presets = {
         label: "Flux.2 Klein 9B",
         description: "Fast FLUX.2 Klein 9B preset using the Qwen3 8B encoder.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -82,6 +89,7 @@ export const flux2Presets = {
             diffusionFa: true,
             offloadToCpu: true,
         },
+        supportsRefImage: true,
         downloads: [
             { label: "FLUX.2 Klein 9B", url: "https://huggingface.co/black-forest-labs/FLUX.2-klein-9B", format: "safetensors" },
             { label: "FLUX.2 Klein 9B GGUF", url: "https://huggingface.co/leejet/FLUX.2-klein-9B-GGUF/tree/main", format: "gguf" },
@@ -95,6 +103,7 @@ export const flux2Presets = {
         label: "Flux.2 Klein Base 9B",
         description: "Base FLUX.2 Klein 9B preset with higher CFG and standard step count.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -104,6 +113,7 @@ export const flux2Presets = {
             diffusionFa: true,
             offloadToCpu: true,
         },
+        supportsRefImage: true,
         downloads: [
             { label: "FLUX.2 Klein Base 9B", url: "https://huggingface.co/black-forest-labs/FLUX.2-klein-base-9B", format: "safetensors" },
             { label: "FLUX.2 Klein Base 9B GGUF", url: "https://huggingface.co/leejet/FLUX.2-klein-base-9B-GGUF/tree/main", format: "gguf" },

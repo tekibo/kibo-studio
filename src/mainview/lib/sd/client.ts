@@ -23,8 +23,15 @@ export async function pickFile(extensions?: string[]): Promise<string> {
     }
 }
 
+const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"];
+
+export function isImageFile(filePath: string): boolean {
+    const ext = filePath.toLowerCase().slice(filePath.lastIndexOf("."));
+    return IMAGE_EXTENSIONS.includes(ext);
+}
+
 export async function pickImageFile(): Promise<string> {
-    return pickFile(["png", "jpg", "jpeg", "webp", "bmp"]);
+    return pickFile(["*"]);
 }
 
 export async function pickFolder(): Promise<string> {

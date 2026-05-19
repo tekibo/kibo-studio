@@ -23,6 +23,10 @@ export const useGenerateStore = create<GenerateState>((set, get) => ({
     isRandomSeed: true,
     resolutionScale: 1,
     steps: 8,
+    videoFrames: 33,
+    fps: 24,
+    flowShift: 3,
+    pmStyleStrength: 20,
     setPrompt: (prompt) => set({ prompt }),
     setIsGenerating: (isGenerating) => set({ isGenerating }),
     setImage: (image) => set({ image }),
@@ -41,6 +45,10 @@ export const useGenerateStore = create<GenerateState>((set, get) => ({
     toggleRandomSeed: () => set((state) => ({ seed: "", isRandomSeed: !state.isRandomSeed })),
     setResolutionScale: (scale) => set({ resolutionScale: scale }),
     setSteps: (steps) => set({ steps }),
+    setVideoFrames: (frames) => set({ videoFrames: frames }),
+    setFps: (fps) => set({ fps }),
+    setFlowShift: (shift) => set({ flowShift: shift }),
+    setPmStyleStrength: (strength) => set({ pmStyleStrength: strength }),
     cancelGeneration: async () => {
         const jobId = get().currentJobId;
         if (!jobId) return;
@@ -66,18 +74,22 @@ export const useGenerateStore = create<GenerateState>((set, get) => ({
                 await configStore.saveSdSettings();
             }
 
+            const selectedPreset = configStore.sdPresets.find((p) => p.id === configStore.selectedPresetId);
+            const supportsRefImage = selectedPreset?.supportsRefImage ?? false;
             const selectedRatio = get().selectedRatio;
             const initPath = get().initImagePath;
             const workingImages = get().workingImages;
             const initEntry = initPath ? workingImages.find(w => w.id === initPath) : undefined;
             const initRefPath = initEntry ? `workspace/${initEntry.fileName}` : undefined;
-            const refImages = initRefPath
-                ? [initRefPath, ...get().refImagePaths]
-                : initPath
-                    ? [initPath, ...get().refImagePaths]
-                    : get().refImagePaths.length > 0
-                        ? get().refImagePaths
-                        : undefined;
+            const refImages = supportsRefImage
+                ? initRefPath
+                    ? [initRefPath, ...get().refImagePaths]
+                    : initPath
+                        ? [initPath, ...get().refImagePaths]
+                        : get().refImagePaths.length > 0
+                            ? get().refImagePaths
+                            : undefined
+                : undefined;
 
             const scale = get().resolutionScale;
             const seedVal = get().isRandomSeed ? undefined : parseInt(get().seed, 10);
@@ -94,6 +106,10 @@ export const useGenerateStore = create<GenerateState>((set, get) => ({
                 strength: initPath ? get().strength : undefined,
                 seed: Number.isFinite(seedVal) ? seedVal : undefined,
                 steps: effectiveSteps,
+                videoFrames: get().videoFrames,
+                fps: get().fps,
+                flowShift: get().flowShift,
+                pmStyleStrength: get().pmStyleStrength,
             });
             const data = await getElectrobun().rpc.request.generateImage({ request: imageRequest });
 
@@ -189,5 +205,9 @@ export const useGenerateStore = create<GenerateState>((set, get) => ({
         maskImagePath: "",
         strength: 0.75,
         refImagePaths: [],
+        videoFrames: 33,
+        fps: 24,
+        flowShift: 3,
+        pmStyleStrength: 20,
     }),
 }));

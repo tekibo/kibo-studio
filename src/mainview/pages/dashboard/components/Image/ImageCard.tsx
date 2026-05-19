@@ -1,4 +1,5 @@
 import { ImageCardMenu } from "./ImageCardMenu";
+import { isVideoDataUrl } from "#lib/utils";
 
 type Props = {
     item: {
@@ -19,12 +20,22 @@ export default function ImageCard({ item, onClick }: Props) {
             className="group relative shrink-0 overflow-hidden rounded-xl border border-border bg-card cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
             style={{ height: 360, aspectRatio: item.width / item.height }}
         >
-            <img
-                src={item.image}
-                alt={item.prompt}
-                className="size-full object-cover"
-                loading="lazy"
-            />
+            {isVideoDataUrl(item.image) ? (
+                <video
+                    src={item.image}
+                    className="size-full object-cover"
+                    muted
+                    loop
+                    playsInline
+                />
+            ) : (
+                <img
+                    src={item.image}
+                    alt={item.prompt}
+                    className="size-full object-cover"
+                    loading="lazy"
+                />
+            )}
 
             <div className="absolute inset-x-0 bottom-0 translate-y-full bg-linear-to-t from-black/70 to-transparent p-3 pt-8 transition-transform group-hover:translate-y-0">
                 <p className="truncate text-xs text-white">{item.prompt || "Untitled"}</p>

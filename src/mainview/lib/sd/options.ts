@@ -15,10 +15,21 @@ export const NO_CACHE_MODE = "none";
 
 export const sdModelFamilyLabels = {
     flux2: "Flux.2",
+    flux1: "Flux.1",
     "qwen-image": "Qwen Image",
     "qwen-image-edit": "Qwen Image Edit",
     "z-image": "Z-Image",
     "ernie-image": "ERNIE-Image",
+    "sd-classic": "Stable Diffusion 1.x/2.x/XL",
+    sd3: "Stable Diffusion 3 / 3.5",
+    chroma: "Chroma",
+    "chroma-radiance": "Chroma Radiance",
+    anima: "Anima",
+    hidream: "HiDream-O1-Image",
+    ovis: "Ovis-Image",
+    "distilled-sd": "Distilled SD",
+    wan: "Wan",
+    ltx: "LTX-2",
 } as const satisfies Record<SdModelFamily, string>;
 
 export const sdVramProfileOptions = [
@@ -69,5 +80,6 @@ export const defaultSdUserConfig = {
     loraModelDir: "",
     sdCliPath: "",
     pathsByPreset: {},
+    perfFlags: {},
     devMode: false,
 } as const satisfies SdUserConfig;

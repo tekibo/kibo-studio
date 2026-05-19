@@ -93,8 +93,9 @@ export function addGeneratedImage(
     prompt: string,
     width: number,
     height: number,
+    ext = "png",
 ): ManifestEntry {
-    const fileName = `${id}.png`;
+    const fileName = `${id}.${ext}`;
     const entry: ManifestEntry = {
         id,
         fileName,
@@ -116,7 +117,7 @@ export async function readImageDataUrl(fileName: string): Promise<string | null>
         const buffer = await file.arrayBuffer();
         const base64 = Buffer.from(buffer).toString("base64");
         const ext = fileName.split(".").pop()?.toLowerCase() ?? "png";
-        const mime = ext === "jpg" || ext === "jpeg" ? "image/jpeg" : `image/${ext}`;
+        const mime = ext === "webm" ? "video/webm" : ext === "jpg" || ext === "jpeg" ? "image/jpeg" : `image/${ext}`;
         return `data:${mime};base64,${base64}`;
     } catch {
         return null;
@@ -131,7 +132,7 @@ export async function listImages(): Promise<(ManifestEntry & { image: string })[
     const entries = readManifest();
     const tracked = new Set(entries.map((e) => e.fileName));
     const dir = readdirSync(WORKSPACE_DIR);
-    const imageExt = /\.(png|jpg|jpeg|webp|bmp)$/i;
+    const imageExt = /\.(png|jpg|jpeg|webp|bmp|webm)$/i;
 
     for (const name of dir) {
         if (!imageExt.test(name) || name === "manifest.json") continue;

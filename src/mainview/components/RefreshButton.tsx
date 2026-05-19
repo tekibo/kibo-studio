@@ -2,6 +2,7 @@ import { FolderOpen, RefreshCw } from "lucide-react";
 import { useState, useCallback } from "react";
 import { getElectrobun } from "@/lib/electrobun";
 import { useGenerateStore } from "#store/generateStore";
+import { Spinner } from "#components/ui/spinner";
 
 export default function RefreshButton() {
     const [spinning, setSpinning] = useState(false);
@@ -23,7 +24,7 @@ export default function RefreshButton() {
     return (
         <>
             <button onClick={handleRefresh} className={btn} aria-label="Refresh workspace images">
-                <RefreshCw className={`size-3.5 ${spinning ? "animate-spin" : ""}`} />
+                {spinning ? <Spinner className="size-3.5" /> : <RefreshCw className="size-3.5" />}
             </button>
             <button onClick={handleOpenFolder} className={btn} aria-label="Open workspace folder"
                 title="Open workspace folder in Explorer"

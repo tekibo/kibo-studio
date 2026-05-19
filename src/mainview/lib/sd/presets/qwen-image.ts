@@ -8,6 +8,7 @@ export const qwenImagePresets = {
         label: "Qwen Image",
         description: "Qwen Image preset with Qwen2.5-VL 7B text encoder and flow-shift tuning.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {

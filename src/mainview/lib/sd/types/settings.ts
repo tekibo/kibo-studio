@@ -1,5 +1,5 @@
 import type { SdCacheMode, SdLoraApplyMode, SdSamplingMethod, SdScmPolicy } from "./cli";
-import type { SdModelFamily, SdModelPaths, SdModelPreset, SdPresetId, SdVramProfile } from "./presets";
+import type { SdModelFamily, SdModelPaths, SdModelPreset, SdPerfFlags, SdPresetId, SdVramProfile } from "./presets";
 
 export type SdPersistedCacheMode = SdCacheMode | "none";
 
@@ -13,6 +13,7 @@ export type SdUserConfig = {
     loraModelDir: string;
     sdCliPath: string;
     pathsByPreset: Partial<Record<SdPresetId, Partial<SdModelPaths>>>;
+    perfFlags: SdPerfFlags;
     devMode: boolean;
 };
 

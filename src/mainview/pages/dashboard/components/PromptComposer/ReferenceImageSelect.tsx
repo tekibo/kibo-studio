@@ -1,7 +1,9 @@
-import { pickImageFile, uploadImageToWorkspace } from "@/lib/sd/client";
+import { pickImageFile, uploadImageToWorkspace, isImageFile } from "@/lib/sd/client";
 import { useGenerateStore } from "@/store/generateStore";
 import { Popover, PopoverTrigger, PopoverContent } from "#components/ui/popover";
+import { Spinner } from "#components/ui/spinner";
 import { Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
 import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,11 @@ export default function ReferenceImageSelect() {
     async function handleUploadReference() {
         const path = await pickImageFile();
         if (!path) return;
+
+        if (!isImageFile(path)) {
+            toast.error("Unsupported file type", { description: "Please select an image file (jpg, png, gif, bmp, webp, svg)." });
+            return;
+        }
 
         setUploading(true);
 
@@ -69,7 +76,7 @@ export default function ReferenceImageSelect() {
                         disabled={uploading}
                     >
                         {uploading ? (
-                            <div className="size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                            <Spinner className="size-3" data-icon="inline-start" />
                         ) : (
                             <Upload className="size-3" />
                         )}

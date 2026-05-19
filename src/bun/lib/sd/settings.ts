@@ -11,6 +11,7 @@ import type {
     SdModelOption,
     SdModelPathKey,
     SdModelPaths,
+    SdPerfFlags,
     SdPresetId,
     SdSettingsResponse,
     SdUserConfig,
@@ -21,6 +22,7 @@ const pathKeys = [
     "diffusionModel",
     "highNoiseDiffusionModel",
     "vae",
+    "audioVae",
     "llm",
     "llmVision",
     "clipL",
@@ -28,6 +30,10 @@ const pathKeys = [
     "clipVision",
     "t5xxl",
     "taesd",
+    "photoMaker",
+    "pmIdImagesDir",
+    "pmIdEmbedPath",
+    "embeddingsConnectors",
 ] as const satisfies readonly SdModelPathKey[];
 
 export async function readSdUserConfig(): Promise<SdUserConfig> {
@@ -116,6 +122,7 @@ function normalizeSdUserConfig(value: unknown): SdUserConfig {
         loraModelDir: typeof input.loraModelDir === "string" ? input.loraModelDir : "",
         sdCliPath: typeof input.sdCliPath === "string" ? input.sdCliPath : "",
         pathsByPreset: normalizePathsByPreset(input.pathsByPreset),
+        perfFlags: normalizePerfFlags(input.perfFlags),
         devMode: typeof input.devMode === "boolean" ? input.devMode : defaultSdUserConfig.devMode,
     };
 }
@@ -130,6 +137,27 @@ function normalizePathsByPreset(value: unknown): SdUserConfig["pathsByPreset"] {
             .filter((entry): entry is [SdPresetId, unknown] => isPresetId(entry[0]))
             .map(([presetId, paths]) => [presetId, normalizeModelPaths(paths)]),
     );
+}
+
+function normalizePerfFlags(value: unknown): SdPerfFlags {
+    if (!isRecord(value)) {
+        return {};
+    }
+
+    const perfFlagKeys: (keyof SdPerfFlags)[] = [
+        "offloadToCpu", "vaeOnCpu", "clipOnCpu", "diffusionFa",
+        "vaeTiling", "fa", "controlNetCpu", "mmap",
+        "diffusionConvDirect", "vaeConvDirect",
+    ];
+    const result: SdPerfFlags = {};
+
+    for (const key of perfFlagKeys) {
+        if (typeof value[key] === "boolean") {
+            result[key] = value[key] as boolean;
+        }
+    }
+
+    return result;
 }
 
 function normalizeModelPaths(value: unknown): Partial<SdModelPaths> {

@@ -1,6 +1,6 @@
 import { fetchSdSettings, saveSdSettings as persistSdSettings } from "@/lib/sd/client";
 import { defaultSdUserConfig, NO_CACHE_MODE } from "@/lib/sd/options";
-import type { SdCacheMode } from "@/lib/sd/types";
+import type { SdCacheMode, SdPerfFlags } from "@/lib/sd/types";
 import { create } from "zustand";
 import type { SdConfigState } from "./types";
 import { applyUserConfigToState, markSettingsDirty, toSdUserConfig } from "./utils";
@@ -13,6 +13,7 @@ export const useSdConfigStore = create<SdConfigState>((set, get) => ({
     vramProfile: defaultSdUserConfig.vramProfile,
     samplingMethod: defaultSdUserConfig.samplingMethod,
     cacheMode: defaultSdUserConfig.cacheMode,
+    perfFlags: {},
     devMode: defaultSdUserConfig.devMode,
     scmPolicy: defaultSdUserConfig.scmPolicy,
     loraApplyMode: defaultSdUserConfig.loraApplyMode,
@@ -100,6 +101,9 @@ export const useSdConfigStore = create<SdConfigState>((set, get) => ({
     setLoraModelDir: (loraModelDir) => set((state) => markSettingsDirty({ loraModelDir }, state.settingsRevision)),
     setSdCliPath: (sdCliPath) => set((state) => markSettingsDirty({ sdCliPath }, state.settingsRevision)),
     setDevMode: (devMode) => set((state) => markSettingsDirty({ devMode }, state.settingsRevision)),
+    setPerfFlag: (key, value) => set((state) => markSettingsDirty({
+        perfFlags: { ...state.perfFlags, [key]: value },
+    }, state.settingsRevision)),
     setPresetPath: (presetId, key, value) => set((state) => {
         const presetPaths = { ...(state.pathsByPreset[presetId] ?? {}) };
 
@@ -116,9 +120,13 @@ export const useSdConfigStore = create<SdConfigState>((set, get) => ({
             },
         }, state.settingsRevision);
     }),
-    buildImageRequest: ({ prompt, width, height, mask, strength, refImages, seed, steps }) => {
+    buildImageRequest: ({ prompt, width, height, mask, strength, refImages, seed, steps, videoFrames, fps, flowShift, pmStyleStrength }) => {
         const state = get();
         const cacheMode = state.cacheMode === NO_CACHE_MODE ? undefined : state.cacheMode as SdCacheMode;
+
+        const perfFlags = Object.fromEntries(
+            Object.entries(state.perfFlags).filter(([, v]) => v !== undefined)
+        ) as SdPerfFlags;
 
         return {
             prompt,
@@ -126,6 +134,7 @@ export const useSdConfigStore = create<SdConfigState>((set, get) => ({
             height,
             presetId: state.selectedPresetId,
             vramProfile: state.vramProfile,
+            ...perfFlags,
             samplingMethod: state.samplingMethod,
             cacheMode,
             scmPolicy: cacheMode ? state.scmPolicy : undefined,
@@ -137,6 +146,10 @@ export const useSdConfigStore = create<SdConfigState>((set, get) => ({
             refImages,
             seed,
             steps,
+            videoFrames,
+            fps,
+            flowShift,
+            pmStyleStrength,
         };
     },
 }));

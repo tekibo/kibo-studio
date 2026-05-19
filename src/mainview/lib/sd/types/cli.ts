@@ -134,6 +134,8 @@ export type SdCliOptions = {
     hiresUpscalersDir?: string;
     tensorTypeRules?: string;
     photoMaker?: string;
+    audioVae?: string;
+    embeddingsConnectors?: string;
     upscaleModel?: string;
     threads?: number;
     chromaT5MaskPad?: number;

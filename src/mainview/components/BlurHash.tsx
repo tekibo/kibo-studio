@@ -1,38 +1,67 @@
-const GRID = [
-    ["#1c1c1c", "#2a2a2a", "#1a1a1a", "#333333", "#1c1c1c", "#222222", "#2e2e2e"],
-    ["#202020", "#1c1c1c", "#3a3a3a", "#202020", "#2e2e2e", "#1a1a1a", "#222222"],
-    ["#1a1a1a", "#333333", "#222222", "#444444", "#2e2e2e", "#1c1c1c", "#2a2a2a"],
-    ["#1c1c1c", "#222222", "#2e2e2e", "#1a1a1a", "#333333", "#3a3a3a", "#1a1a1a"],
-    ["#2a2a2a", "#1a1a1a", "#2e2e2e", "#2e2e2e", "#1c1c1c", "#202020", "#333333"],
-    ["#202020", "#333333", "#1c1c1c", "#3a3a3a", "#222222", "#2a2a2a", "#1c1c1c"],
-    ["#1a1a1a", "#1c1c1c", "#2e2e2e", "#222222", "#2a2a2a", "#1a1a1a", "#202020"],
-];
+import { useEffect, useRef, useState } from "react";
+import { decode } from "blurhash";
 
-export function BlurHash({ className, style }: { className?: string; style?: React.CSSProperties }) {
-    const rows = GRID.length;
-    const cols = GRID[0].length;
-    const tileW = `${100 / cols}%`;
-    const tileH = `${100 / rows}%`;
+const DEFAULT_BLURHASH = "LEHV6nWB2yk8pyo0adR*.7kCMdnj";
+
+type Props = {
+    src?: string;
+    blurhash?: string;
+    className?: string;
+    style?: React.CSSProperties;
+    alt?: string;
+};
+
+export function BlurhashImage({ src, blurhash = DEFAULT_BLURHASH, className, style, alt }: Props) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const size = 32;
+        const pixels = decode(blurhash, size, size);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        const imageData = ctx.createImageData(size, size);
+        imageData.data.set(pixels);
+        canvas.width = size;
+        canvas.height = size;
+        ctx.putImageData(imageData, 0, 0);
+    }, [blurhash]);
+
+    useEffect(() => {
+        if (!src) { setLoaded(false); return; }
+        setLoaded(false);
+        const img = new Image();
+        img.onload = () => setLoaded(true);
+        img.onerror = () => setLoaded(true);
+        img.src = src;
+    }, [src]);
 
     return (
-        <svg
-            className={className}
-            xmlns="http://www.w3.org/2000/svg"
-            preserveAspectRatio="none"
-            style={{ ...style, filter: "blur(24px)" }}
-        >
-            {GRID.map((row, ri) =>
-                row.map((color, ci) => (
-                    <rect
-                        key={`${ri}-${ci}`}
-                        x={`${(ci * 100) / cols}%`}
-                        y={`${(ri * 100) / rows}%`}
-                        width={tileW}
-                        height={tileH}
-                        fill={color}
-                    />
-                ))
+        <div className={className} style={{ position: "relative", overflow: "hidden", ...style }}>
+            <canvas
+                ref={canvasRef}
+                style={{
+                    position: "absolute", inset: 0, width: "100%", height: "100%",
+                    objectFit: "cover", transition: "opacity 0.5s ease-out",
+                    opacity: loaded ? 0 : 1,
+                }}
+            />
+            {src && (
+                <img
+                    src={src}
+                    alt={alt ?? ""}
+                    className="absolute inset-0 size-full object-cover"
+                    style={{
+                        transition: "opacity 0.5s ease-out",
+                        opacity: loaded ? 1 : 0,
+                    }}
+                    loading="lazy"
+                />
             )}
-        </svg>
+        </div>
     );
 }

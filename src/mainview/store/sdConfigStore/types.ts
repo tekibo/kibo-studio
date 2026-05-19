@@ -6,6 +6,7 @@ import type {
     SdModelPathKey,
     SdModelPaths,
     SdModelPreset,
+    SdPerfFlags,
     SdPersistedCacheMode,
     SdPresetId,
     SdSamplingMethod,
@@ -27,6 +28,7 @@ export type SdConfigState = {
     loraModelDir: string;
     sdCliPath: string;
     pathsByPreset: Partial<Record<SdPresetId, Partial<SdModelPaths>>>;
+    perfFlags: SdPerfFlags;
     devMode: boolean;
     isSettingsLoading: boolean;
     isSettingsSaving: boolean;
@@ -48,6 +50,7 @@ export type SdConfigState = {
     setSdCliPath: (path: string) => void;
     setPresetPath: (presetId: SdPresetId, key: SdModelPathKey, value: string) => void;
     setDevMode: (devMode: boolean) => void;
+    setPerfFlag: (key: keyof SdPerfFlags, value: boolean | undefined) => void;
     buildImageRequest: (input: {
         prompt: string;
         width: number;
@@ -57,6 +60,10 @@ export type SdConfigState = {
         refImages?: string[];
         seed?: number;
         steps?: number;
+        videoFrames?: number;
+        fps?: number;
+        flowShift?: number;
+        pmStyleStrength?: number;
     }) => ImageRequest;
 };
 
@@ -71,6 +78,7 @@ export type SdConfigSnapshot = Pick<
     | "loraModelDir"
     | "sdCliPath"
     | "pathsByPreset"
+    | "perfFlags"
     | "devMode"
 >;
 

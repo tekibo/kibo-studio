@@ -36,6 +36,10 @@ export type GenerateState = {
     isRandomSeed: boolean;
     resolutionScale: number;
     steps: number;
+    videoFrames: number;
+    fps: number;
+    flowShift: number;
+    pmStyleStrength: number;
     setPrompt: (prompt: string) => void;
     setIsGenerating: (isGenerating: boolean) => void;
     setImage: (image: string) => void;
@@ -52,6 +56,10 @@ export type GenerateState = {
     toggleRandomSeed: () => void;
     setResolutionScale: (scale: number) => void;
     setSteps: (steps: number) => void;
+    setVideoFrames: (frames: number) => void;
+    setFps: (fps: number) => void;
+    setFlowShift: (shift: number) => void;
+    setPmStyleStrength: (strength: number) => void;
     generate: () => Promise<void>;
     cancelGeneration: () => Promise<void>;
     pollForResult: (jobId: string) => Promise<void>;

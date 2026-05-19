@@ -3,6 +3,8 @@ import { Download, RefreshCw, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { pickSavePath, writeBase64File } from "#lib/sd/client";
 import { useGenerateStore } from "#store/generateStore";
+import { Spinner } from "#components/ui/spinner";
+import { isVideoDataUrl } from "#lib/utils";
 
 type Props = {
     image: string;
@@ -27,21 +29,24 @@ export function ImageModal({ image, prompt, onClose, id, source }: Props) {
         return () => document.removeEventListener("keydown", handleKey);
     }, [onClose]);
 
+    const isVideo = isVideoDataUrl(image);
+
     const handleDownload = async () => {
         const base64 = image.split(",")[1];
         if (!base64) return;
 
         setSaving(true);
-        const filePath = await pickSavePath("generated-image.png");
+        const defaultName = isVideo ? "generated-video.webm" : "generated-image.png";
+        const filePath = await pickSavePath(defaultName);
         if (!filePath) { setSaving(false); return; }
 
         const error = await writeBase64File(filePath, base64);
         setSaving(false);
 
         if (error) {
-            toast.error("Failed to save image", { description: error });
+            toast.error("Failed to save " + (isVideo ? "video" : "image"), { description: error });
         } else {
-            toast.success("Image saved", { description: filePath });
+            toast.success(isVideo ? "Video saved" : "Image saved", { description: filePath });
         }
     };
 
@@ -99,10 +104,13 @@ export function ImageModal({ image, prompt, onClose, id, source }: Props) {
                     </button>
                 </div>
                 {saving ? (
-                    <div className="flex items-center gap-3 rounded-lg bg-card px-6 py-4 text-sm text-muted-foreground">
-                        <div className="size-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <div className="flex items-center gap-2 rounded-lg bg-card px-6 py-4 text-sm text-muted-foreground">
+                        <Spinner />
                         Saving...
                     </div>
+                ) : isVideo ? (
+                    <video src={image} controls autoPlay loop
+                        className="max-h-[85vh] max-w-full rounded-xl shadow-2xl" />
                 ) : (
                     <img src={image} alt={prompt}
                         className="max-h-[85vh] max-w-full rounded-xl object-contain shadow-2xl" />

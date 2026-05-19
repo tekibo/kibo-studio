@@ -64,7 +64,7 @@ export function buildImageGenerationOptions(request: ImageGenerationRequest, out
     ];
 
     const options = pruneUndefined<SdCliOptions>({
-        mode: "img_gen",
+        mode: preset.runMode,
         negativePrompt: "",
         verbose: true,
         color: true,

@@ -9,6 +9,7 @@ export const qwenImageEditPresets = {
         label: "Qwen Image Edit",
         description: "Qwen Image Edit model for instruction-based image editing using Qwen2.5-VL 7B.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -20,12 +21,9 @@ export const qwenImageEditPresets = {
             diffusionFa: true,
             offloadToCpu: true,
         },
+        supportsRefImage: true,
         downloads: [
             { label: "Qwen Image Edit GGUF", url: "https://huggingface.co/QuantStack/Qwen-Image-Edit-GGUF/tree/main", format: "gguf" },
-            { label: "Qwen Image Edit (safetensors)", url: "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/tree/main/split_files/diffusion_models", format: "safetensors" },
-            { label: "Qwen Image VAE", url: "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/tree/main/split_files/vae", format: "safetensors" },
-            { label: "Qwen2.5-VL 7B", url: "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/tree/main/split_files/text_encoders", format: "safetensors" },
-            { label: "Qwen2.5-VL 7B GGUF", url: "https://huggingface.co/mradermacher/Qwen2.5-VL-7B-Instruct-GGUF/tree/main", format: "gguf" },
         ],
     },
     "qwen-image-edit-2509": {
@@ -34,6 +32,7 @@ export const qwenImageEditPresets = {
         label: "Qwen Image Edit 2509",
         description: "Qwen Image Edit 2509 with improved editing and LLM vision encoder.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmLlmVisionPathInputs,
         defaults: {
@@ -45,6 +44,7 @@ export const qwenImageEditPresets = {
             diffusionFa: true,
             offloadToCpu: true,
         },
+        supportsRefImage: true,
         downloads: [
             { label: "Qwen Image Edit 2509 GGUF", url: "https://huggingface.co/QuantStack/Qwen-Image-Edit-2509-GGUF/tree/main", format: "gguf" },
             { label: "Qwen Image Edit 2509 (safetensors)", url: "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/tree/main/split_files/diffusion_models", format: "safetensors" },
@@ -59,6 +59,7 @@ export const qwenImageEditPresets = {
         label: "Qwen Image Edit 2511",
         description: "Qwen Image Edit 2511 with zero-cond-t for improved quality.",
         defaultVramProfile: "balanced",
+        runMode: "img_gen",
         paths: {},
         pathInputs: diffusionVaeLlmPathInputs,
         defaults: {
@@ -71,6 +72,7 @@ export const qwenImageEditPresets = {
             offloadToCpu: true,
             qwenImageZeroCondT: true,
         },
+        supportsRefImage: true,
         downloads: [
             { label: "Qwen Image Edit 2511 GGUF", url: "https://huggingface.co/unsloth/Qwen-Image-Edit-2511-GGUF/tree/main", format: "gguf" },
             { label: "Qwen Image Edit 2511 (safetensors)", url: "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/tree/main/split_files/diffusion_models", format: "safetensors" },

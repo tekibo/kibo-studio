@@ -1,12 +1,13 @@
 import { useRef, useEffect } from "react";
 import { useGenerateStore } from "#store/generateStore";
-import { ASPECT_RATIOS } from "#store/generateStore";
+import { useSdConfigStore } from "#store/sdConfigStore";
 import { readImageFile } from "#lib/sd/client";
-import AspectRatioSelect from "./AspectRatioSelect";
+import Configurator from "../Configurator";
 import ReferenceImageBar from "./ReferenceImageBar";
 import PromptTextarea from "./PromptTextarea";
 import GenerateButton from "./GenerateButton";
 import ReferenceImageSelect from "./ReferenceImageSelect";
+import PhotoMakerSelect from "./PhotoMakerSelect";
 import SeedInput from "./SeedInput";
 import { cn } from "@/lib/utils";
 
@@ -15,8 +16,6 @@ export function PromptComposer({ onGenerate, onStop }: { onGenerate: () => void;
     const initImageDataUrl = useGenerateStore((s) => s.initImageDataUrl);
     const prompt = useGenerateStore((s) => s.prompt);
     const setPrompt = useGenerateStore((s) => s.setPrompt);
-    const selectedRatio = useGenerateStore((s) => s.selectedRatio);
-    const setSelectedRatio = useGenerateStore((s) => s.setSelectedRatio);
     const initImagePath = useGenerateStore((s) => s.initImagePath);
     const setInitImage = useGenerateStore((s) => s.setInitImage);
     const clearInitImage = useGenerateStore((s) => s.clearInitImage);
@@ -24,6 +23,12 @@ export function PromptComposer({ onGenerate, onStop }: { onGenerate: () => void;
     const isRandomSeed = useGenerateStore((s) => s.isRandomSeed);
     const setSeed = useGenerateStore((s) => s.setSeed);
     const toggleRandomSeed = useGenerateStore((s) => s.toggleRandomSeed);
+    const selectedPresetId = useSdConfigStore((s) => s.selectedPresetId);
+    const sdPresets = useSdConfigStore((s) => s.sdPresets);
+
+    const selectedPreset = sdPresets.find((p) => p.id === selectedPresetId);
+    const supportsRefImage = selectedPreset?.supportsRefImage ?? false;
+    const supportsPhotoMaker = selectedPreset?.supportsPhotoMaker ?? false;
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -53,8 +58,8 @@ export function PromptComposer({ onGenerate, onStop }: { onGenerate: () => void;
 
     return (
         <div className="shrink-0 px-4 pb-4 z-50 absolute bottom-2 left-0 right-0">
-            <div className="mx-auto w-full max-w-[720px] ">
-                {initImagePath && initImageDataUrl && (
+            <div className="mx-auto w-full max-w-180 ">
+                {supportsRefImage && initImagePath && initImageDataUrl && (
                     <ReferenceImageBar
                         imageUrl={initImageDataUrl}
                         onClear={clearInitImage}
@@ -73,13 +78,9 @@ export function PromptComposer({ onGenerate, onStop }: { onGenerate: () => void;
 
                     <div className="flex items-center justify-between px-2 py-1.5">
                         <div className="flex items-center gap-1">
-                            <ReferenceImageSelect />
-                            <AspectRatioSelect
-                                ratios={ASPECT_RATIOS}
-                                selected={selectedRatio}
-                                onSelect={setSelectedRatio}
-                                disabled={isGenerating}
-                            />
+                            {supportsRefImage && <ReferenceImageSelect />}
+                            {supportsPhotoMaker && <PhotoMakerSelect disabled={isGenerating} />}
+                            <Configurator />
                             <div className="hidden sm:flex items-center gap-1">
                                 <SeedInput
                                     seed={seed}

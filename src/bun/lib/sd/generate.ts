@@ -1,7 +1,7 @@
 import { spawn } from "bun";
 import { mkdirSync, existsSync } from "fs";
 import { dirname, join } from "path";
-import { buildImageGenerationCommand } from "./diffusion";
+import { buildImageGenerationCommand, getSdPreset } from "./diffusion";
 import { applySdUserConfig } from "./settings";
 import { addGeneratedImage, WORKSPACE_DIR } from "../workspace";
 import type { ImageGenerationJob, ImageRequest, ImageResponse } from "../../../mainview/lib/sd/types";
@@ -44,24 +44,28 @@ const WS_PREFIX = /^workspace\//;
 
 export default async function generateImage(request: ImageRequest): Promise<ImageResponse> {
     const jobId = `job_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const output = join(WORKSPACE_DIR, `${jobId}.png`);
+
+    const generationRequest = await applySdUserConfig(request);
+
+    const preset = getSdPreset(generationRequest.presetId);
+    const isVideo = preset.runMode === "vid_gen";
+    const ext = isVideo ? ".webm" : ".png";
+    const output = join(WORKSPACE_DIR, `${jobId}${ext}`);
 
     // Resolve workspace-relative paths to absolute WORKSPACE_DIR paths
     const resolvePath = (p: string) => WS_PREFIX.test(p) ? join(WORKSPACE_DIR, p.slice(10)) : p;
-    const resolved = {
-        ...request,
-        refImages: request.refImages?.map(resolvePath),
-        referenceImage: request.referenceImage ? resolvePath(request.referenceImage) : undefined,
+    const generationRequestResolved = {
+        ...generationRequest,
+        refImages: generationRequest.refImages?.map(resolvePath),
+        referenceImage: generationRequest.referenceImage ? resolvePath(generationRequest.referenceImage) : undefined,
     };
 
-    const generationRequest = await applySdUserConfig(resolved);
-
-    const cmd = await buildImageGenerationCommand(generationRequest, output);
+    const cmd = await buildImageGenerationCommand(generationRequestResolved, output);
     const cmdStr = cmd.join(" ");
     jobs.set(jobId, { status: "pending", command: cmdStr });
 
     setImmediate(() => {
-        void runImageGeneration(jobId, generationRequest, output, cmd);
+        void runImageGeneration(jobId, generationRequestResolved, output, cmd);
     });
 
     return {
@@ -125,9 +129,11 @@ async function runImageGeneration(jobId: string, request: ImageRequest, output: 
         const file = Bun.file(output);
         const buffer = await file.arrayBuffer();
         const base64 = Buffer.from(buffer).toString("base64");
-        const dataUrl = `data:image/png;base64,${base64}`;
+        const mimeType = output.endsWith(".webm") ? "video/webm" : "image/png";
+        const dataUrl = `data:${mimeType};base64,${base64}`;
 
-        addGeneratedImage(jobId, request.prompt, request.width ?? 0, request.height ?? 0);
+        const genExt = output.endsWith(".webm") ? "webm" : "png";
+        addGeneratedImage(jobId, request.prompt, request.width ?? 0, request.height ?? 0, genExt);
 
         const current = jobs.get(jobId);
         if (current) {
